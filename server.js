@@ -6,6 +6,7 @@ import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 import produitRoutes from './routes/produit.js';
+import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
 
 
 const app = express();
@@ -30,12 +31,12 @@ mongoose
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use('/img', express.static('public/images'));
+  app.use('/user', userRoutes); 
+  app.use('/produit', produitRoutes);
 
-app.use('/produit', produitRoutes);
 
-
-app.use(notFoundError);
-app.use(errorHandler);
+  app.use(notFoundError);
+  app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
