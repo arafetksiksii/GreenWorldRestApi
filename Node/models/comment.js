@@ -6,18 +6,20 @@ const commentSchema = new Schema(
             type: String,
             required: true
         },
-        date: {
-            type: Date,
-            required: true
-        },
+        date: { type: Date, 
+            default: Date.now },
+
         auteur: {
             type: String,
             required: true
         },
+        EventID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'comment',
+            require: true,
+        },
     },
-        {
-            timesStamps: true //date automatique
-        }
+        
 );
     
 export default model("Comment", commentSchema);

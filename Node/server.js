@@ -4,6 +4,7 @@ import morgan from 'morgan'; // Importer morgan
 import cors from 'cors'; // Importer cors
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import eventRoutes from './routes/event.js';
+import CommentRoute from './routes/comment.js'
 
 const app = express();
 const databaseName = 'GreenWorld';
@@ -36,6 +37,8 @@ app.use('/evt', (req, res, next) => {
     next();
   });
   app.use('/event', eventRoutes);
+  app.use('/comment', CommentRoute)
+
 // Utiliser le middleware de routes introuvables
 app.use(notFoundError);
 // Utiliser le middleware gestionnaire d'erreurs

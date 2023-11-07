@@ -29,7 +29,7 @@ const eventSchema = new Schema(
         nbparticipant: {
             type: Number,
             required: true
-        }
+        },
     },
         {
             timesStamps: true //date automatique
