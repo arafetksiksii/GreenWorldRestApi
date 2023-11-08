@@ -6,13 +6,19 @@ import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 import produitRoutes from './routes/produit.js';
+import quizRoutes from './routes/quiz.js';
+import questionRoutes from './routes/question.js';
+import resultatQuizRoutes from './routes/resultatQuiz.js';
+
+
+
 import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
 
 
 const app = express();
 const port = process.env.PORT || 9090;
 const databaseName = 'GreenWorld';
-const db_url = process.env.DB_URL || `mongodb://localhost:27017`;
+const db_url = process.env.DB_URL || `mongodb://127.0.0.1:27017`;
 
 mongoose.set('debug', true);
 mongoose.Promise = global.Promise;
@@ -33,6 +39,12 @@ mongoose
   app.use('/img', express.static('public/images'));
   app.use('/user', userRoutes); 
   app.use('/produit', produitRoutes);
+  app.use('/quiz', quizRoutes);
+  app.use('/question', questionRoutes);
+  app.use('/resultatQuiz', resultatQuizRoutes);
+
+
+
 
 
   app.use(notFoundError);
