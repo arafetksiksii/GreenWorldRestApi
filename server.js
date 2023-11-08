@@ -2,20 +2,16 @@ import express from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import cors from 'cors';
-
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-
 import produitRoutes from './routes/produit.js';
 import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
-
-
-
 import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
 import dechetsRoutes from './routes/dechets.js';
 import demandeRoutes from './routes/demande.js';
-
+import eventRoutes from './routes/event.js';
+import CommentRoute from './routes/comment.js'
 
 const app = express();
 const port = process.env.PORT || 9090;
@@ -41,17 +37,13 @@ mongoose
   app.use('/img', express.static('public/images'));
   app.use('/user', dechetsRoutes); 
   app.use('/produit', produitRoutes);
-  
   app.use('/dechets', userRoutes); 
   app.use('/demande', demandeRoutes);
   app.use('/quiz', quizRoutes);
   app.use('/question', questionRoutes);
   app.use('/resultatQuiz', resultatQuizRoutes);
-
-
-
-
-
+  app.use('/event', eventRoutes);
+  app.use('/comment', CommentRoute)
   app.use(notFoundError);
   app.use(errorHandler);
 
