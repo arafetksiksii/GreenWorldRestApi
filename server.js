@@ -7,12 +7,14 @@ import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 
 import produitRoutes from './routes/produit.js';
 import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
+import dechetsRoutes from './routes/dechets.js';
+import demandeRoutes from './routes/demande.js';
 
 
 const app = express();
 const port = process.env.PORT || 9090;
 const databaseName = 'GreenWorld';
-const db_url = process.env.DB_URL || `mongodb://localhost:27017`;
+const db_url = process.env.DB_URL || `mongodb://127.0.0.1:27017`;
 
 mongoose.set('debug', true);
 mongoose.Promise = global.Promise;
@@ -31,9 +33,11 @@ mongoose
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use('/img', express.static('public/images'));
-  app.use('/user', userRoutes); 
+  app.use('/user', dechetsRoutes); 
   app.use('/produit', produitRoutes);
-
+  
+  app.use('/dechets', userRoutes); 
+  app.use('/demande', demandeRoutes);
 
   app.use(notFoundError);
   app.use(errorHandler);
