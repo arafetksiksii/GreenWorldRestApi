@@ -2,22 +2,23 @@ import express from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import cors from 'cors';
-
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
-
 import produitRoutes from './routes/produit.js';
 import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
-
-
-
 import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
 import dechetsRoutes from './routes/dechets.js';
 import demandeRoutes from './routes/demande.js';
+import eventRoutes from './routes/event.js';
+import CommentRoute from './routes/comment.js'
+//auth
 
-
+import bodyParser from 'body-parser';
+import authController from './controllers/authController.js';
+///
 const app = express();
+app.use(bodyParser.json());
 const port = process.env.PORT || 9090;
 const databaseName = 'GreenWorld';
 const db_url = process.env.DB_URL || `mongodb://127.0.0.1:27017`;
@@ -41,20 +42,17 @@ mongoose
   app.use('/img', express.static('public/images'));
   app.use('/user', userRoutes); 
   app.use('/produit', produitRoutes);
-  
+  app.use('/auth', authController);
   app.use('/dechets', dechetsRoutes); 
   app.use('/demande', demandeRoutes);
   app.use('/quiz', quizRoutes);
   app.use('/question', questionRoutes);
   app.use('/resultatQuiz', resultatQuizRoutes);
-
-
-
-
-
+  app.use('/event', eventRoutes);
+  app.use('/comment', CommentRoute)
   app.use(notFoundError);
   app.use(errorHandler);
-
+ 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
 });
