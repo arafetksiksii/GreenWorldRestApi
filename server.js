@@ -12,8 +12,13 @@ import dechetsRoutes from './routes/dechets.js';
 import demandeRoutes from './routes/demande.js';
 import eventRoutes from './routes/event.js';
 import CommentRoute from './routes/comment.js'
+//auth
 
+import bodyParser from 'body-parser';
+import authController from './controllers/authController.js';
+///
 const app = express();
+app.use(bodyParser.json());
 const port = process.env.PORT || 9090;
 const databaseName = 'GreenWorld';
 const db_url = process.env.DB_URL || `mongodb://127.0.0.1:27017`;
@@ -37,7 +42,7 @@ mongoose
   app.use('/img', express.static('public/images'));
   app.use('/user', userRoutes); 
   app.use('/produit', produitRoutes);
-  
+  app.use('/auth', authController);
   app.use('/dechets', dechetsRoutes); 
   app.use('/demande', demandeRoutes);
   app.use('/quiz', quizRoutes);
@@ -47,7 +52,7 @@ mongoose
   app.use('/comment', CommentRoute)
   app.use(notFoundError);
   app.use(errorHandler);
-
+ 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}/`);
 });
