@@ -1,28 +1,30 @@
-# GreenWorldRestApi
+# User Management in GreenWorldRestApi
 
-## Description
-Green World is a comprehensive mobile application focused on raising environmental awareness, promoting sustainable living, and empowering users to take action in real-time against ecological threats. Conceived by a dedicated team, it aims to serve as a crucial tool in the global effort to protect our planet. It enables users to monitor environmental activities, report incidents like illegal deforestation, pollution, or loss of biodiversity, and facilitates immediate action by notifying relevant authorities.
+Developed by Aymen Zouaoui
 
-## Objectives
-Our mission is to provide an engaging and educational experience that encourages users to contribute actively to environmental preservation. Green World combines real-time environmental monitoring with a user-friendly interface to foster a proactive community for Earth's protection.
+## Overview
+The user management module of the GreenWorldRestApi is a robust system designed to handle user interactions securely and efficiently. It encompasses user registration, authentication, profile management, and security features to ensure that users can safely access and utilize the environmental awareness features of the Green World application.
 
 ## Features
-- **Real-time Environmental Monitoring**: Track and report environmental activities and incidents.
-- **User Engagement**: Interactive platform with social networking features for sharing and community building.
-- **Informative Dashboards**: Live updates on environmental issues and incident reports.
-- **Gamification**: Engage users with educational games about biodiversity and ecological challenges.
 
-## Team
-- Aymen Zouaoui
-- Chaima Eljed
-- Arafet Ksiksi
-- Chaima Saadallah
-- Walid Bouzouita
+### User Registration and Authentication
+- Users can sign up to the platform and create their own secure account.
+- The login system ensures that user credentials are verified before granting access to the application.
 
-## Installation
-Instructions for setting up the API locally:
+### Profile Management
+- After logging in, users can customize their profiles by adding a profile picture and detailing their environmental interests.
+- Users have the ability to personalize their experience and manage their account details.
 
-```bash
-git clone https://github.com/arafetksiksii/GreenWorldRestApi
-cd GreenWorldRestApi
-# Follow the setup instructions detailed below
+### Security
+- Two-factor authentication (2FA) can be enabled for an additional layer of security.
+- User permissions are carefully managed to ensure that sensitive features are only accessible to authorized personnel.
+
+### Notifications and Preferences
+- Email notifications keep users informed about environmental events and alerts.
+- Users can set and customize their notification preferences to stay updated on the topics they care about most.
+
+## Contributions
+This module is the result of dedicated work by Aymen Zouaoui, focusing on providing a user-friendly and secure environment for all users of the Green World app.
+
+## Contact
+For any queries regarding user management, please contact Aymen Zouaoui at [aymen.zouaoui@esprit.tn].
