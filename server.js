@@ -35,9 +35,10 @@ mongoose
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use('/img', express.static('public/images'));
-  app.use('/user', dechetsRoutes); 
+  app.use('/user', userRoutes); 
   app.use('/produit', produitRoutes);
-  app.use('/dechets', userRoutes); 
+  
+  app.use('/dechets', dechetsRoutes); 
   app.use('/demande', demandeRoutes);
   app.use('/quiz', quizRoutes);
   app.use('/question', questionRoutes);

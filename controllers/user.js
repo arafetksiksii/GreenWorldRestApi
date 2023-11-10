@@ -43,6 +43,7 @@ export function addUser(req, res) {
       lastPassword: req.body.lastPassword,
       isValid: req.body.isValid,
       imageRes: req.body.imageRes,
+     // imageRes:`http://192.168.1.166:9090/img/${req.file.filename}`
       role: req.body.role,
     })
       .then((newUser) => {
@@ -83,7 +84,8 @@ export function updateUserById(req, res) {
       userName: req.body.userName,
       lastPassword: req.body.lastPassword,
       isValid: req.body.isValid,
-      imageRes: req.body.imageRes,
+      imageRes: req.body.imageRes, 
+     // imageRes:`http://192.168.1.166:9090/img/${req.file.filename}`
       role: req.body.role,
     };
 
