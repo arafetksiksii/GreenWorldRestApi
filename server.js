@@ -8,6 +8,7 @@ import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
 import userRoutes from './routes/user.js'; // Assurez-vous que le chemin du fichier est correct
+
 import dechetsRoutes from './routes/dechets.js';
 import demandeRoutes from './routes/demande.js';
 import eventRoutes from './routes/event.js';
@@ -41,6 +42,7 @@ mongoose
   app.use(express.urlencoded({ extended: true }));
   app.use('/img', express.static('public/images'));
   app.use('/user', userRoutes); 
+
   app.use('/produit', produitRoutes);
   app.use('/auth', authController);
   app.use('/dechets', dechetsRoutes); 
