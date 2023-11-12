@@ -40,11 +40,13 @@ mongoose
   app.use(morgan('dev'));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  //user rouute{
   app.use('/img', express.static('public/images'));
-  app.use('/user', userRoutes); 
-
-  app.use('/produit', produitRoutes);
   app.use('/auth', authController);
+  app.use('/user', userRoutes); 
+////////}
+  app.use('/produit', produitRoutes);
+ 
   app.use('/dechets', dechetsRoutes); 
   app.use('/demande', demandeRoutes);
   app.use('/quiz', quizRoutes);
@@ -56,5 +58,8 @@ mongoose
   app.use(errorHandler);
  
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}/`);
+  console.log(`Server running at http://192.168.1.16:${port}/`);
+  
 });
+
+

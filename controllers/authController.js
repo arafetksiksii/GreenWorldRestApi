@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'; // Assuming you are using bcrypt for password hashi
 import User from '../models/user.js'; // Import your user model
 
 const router = express.Router();
-
+//Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -38,12 +38,21 @@ try {
  console.log('JWT token:', token);
 
  // Send the token in the response
- res.json({ token });
+ res.json(user);
 } catch (error) {
  console.error(error);
  res.status(500).json({ message: 'Internal Server Error' });
 }
 });
+
+
+
+// Logout route
+router.post('/logout', (req, res) => {
+  
+  res.json({ message: 'Logout successful' });
+});
+
 
 
 export default router;

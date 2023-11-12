@@ -4,6 +4,8 @@ import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 
+
+//configuration nodemailer 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -11,6 +13,9 @@ const transporter = nodemailer.createTransport({
     pass: '223AMT0874',
   },
 });
+
+
+//recover all users
 export function getAllUsers(req, res) {
   authenticateUser(req, res, () => {
     authorizeAdmin(req, res, () => {
@@ -41,7 +46,7 @@ export function getAllUsers(req, res) {
   });
 });
 }
-
+// add user
 export function addUser(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -81,12 +86,17 @@ export function addUser(req, res) {
       });
     })
     .then((newUser) => {
+
+      // Read the HTML content from a file
       // Envoi de l'e-mail de bienvenue
       const mailOptions = {
         from: 'votre-email@gmail.com',
         to: newUser.email,
         subject: 'Bienvenue sur votre application',
         text: 'Merci de vous être inscrit sur notre application. Bienvenue!',
+       
+    
+  
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -158,9 +168,9 @@ export function updateUserById(req, res) {
   });
 }
 
-
 export function deleteUserById(req, res) {
-  User.findByIdAndRemove(req.params.id)
+  authorizeAdmin(req, res, () => {
+  User.findOneAndDelete({ _id: req.params.id })
     .then((user) => {
       if (!user) {
         res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -171,4 +181,53 @@ export function deleteUserById(req, res) {
     .catch((err) => {
       res.status(500).json({ error: err });
     });
+  });
 }
+// Import necessary modules and middleware
+
+// ...
+
+
+
+export function updateProfilById(req, res) {
+  if (!validationResult(req).isEmpty()) {
+    return res.status(400).json({ errors: validationResult(req).array() });
+  }
+
+  // Use the authentication middleware before the authorization middleware
+  authenticateUser(req, res, () => {
+    // Check if the authenticated user is the same as the user being updated
+    if (req.user.id !== req.params.id) {
+      return res.status(403).json({ message: 'Forbidden - You are not allowed to modify this user' });
+    }
+
+    const updatedUserData = {
+      email: req.body.email,
+      password: req.body.password,
+      nom: req.body.nom,
+      prenom: req.body.prenom,
+      dateNaissance: req.body.dateNaissance,
+      adress: req.body.adress,
+      cin: req.body.cin,
+      userName: req.body.userName,
+      lastPassword: req.body.lastPassword,
+      isValid: req.body.isValid,
+      imageRes: req.body.imageRes, 
+      role: req.body.role,
+    };
+
+    User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true })
+      .then((updatedUser) => {
+        if (!updatedUser) {
+          res.status(404).json({ message: 'Utilisateur introuvable' });
+        } else {
+          res.status(200).json(updatedUser);
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err });
+      });
+  });
+}
+
+
