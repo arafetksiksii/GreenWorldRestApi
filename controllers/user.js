@@ -2,6 +2,15 @@ import { validationResult } from 'express-validator';
 import User from '../models/user.js';
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'aymen.zouaoui@esprit.tn',
+    pass: '223AMT0874',
+  },
+});
 export function getAllUsers(req, res) {
   authenticateUser(req, res, () => {
     authorizeAdmin(req, res, () => {
@@ -34,52 +43,67 @@ export function getAllUsers(req, res) {
 }
 
 export function addUser(req, res) {
-  if (!validationResult(req).isEmpty()) {
-    res.status(400).json({ errors: validationResult(req).array() });
-  } else {
-    const {
-      email,
-      password,
-      nom,
-      prenom,
-      dateNaissance,
-      adress,
-      cin,
-      userName,
-      lastPassword,
-      isValid,
-      imageRes,
-      role,
-    } = req.body;
-
-    // Hash the password before saving it to the database
-    bcrypt.hash(password, 10, (hashError, hashedPassword) => {
-      if (hashError) {
-        res.status(500).json({ error: 'Error hashing password' });
-      } else {
-        User.create({
-          email,
-          password: hashedPassword, // Store the hashed password
-          nom,
-          prenom,
-          dateNaissance,
-          adress,
-          cin,
-          userName,
-          lastPassword,
-          isValid,
-          imageRes,
-          role,
-        })
-          .then((newUser) => {
-            res.status(200).json(newUser);
-          })
-          .catch((err) => {
-            res.status(500).json({ error: err });
-          });
-      }
-    });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
+
+  const {
+    email,
+    password,
+    nom,
+    prenom,
+    dateNaissance,
+    adress,
+    cin,
+    userName,
+    lastPassword,
+    isValid,
+    imageRes,
+    role,
+  } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then((hashedPassword) => {
+      return User.create({
+        email,
+        password: hashedPassword,
+        nom,
+        prenom,
+        dateNaissance,
+        adress,
+        cin,
+        userName,
+        lastPassword,
+        isValid,
+        imageRes,
+        role,
+      });
+    })
+    .then((newUser) => {
+      // Envoi de l'e-mail de bienvenue
+      const mailOptions = {
+        from: 'votre-email@gmail.com',
+        to: newUser.email,
+        subject: 'Bienvenue sur votre application',
+        text: 'Merci de vous être inscrit sur notre application. Bienvenue!',
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          // Si l'envoi de l'e-mail échoue, cela ne bloque pas la réponse au client
+        } else {
+          console.log('E-mail de bienvenue envoyé : ' + info.response);
+        }
+      });
+
+      res.status(200).json(newUser);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    });
 }
 
 export function getUserById(req, res) {
