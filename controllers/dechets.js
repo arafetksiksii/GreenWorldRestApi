@@ -12,7 +12,7 @@ export function getAll(req, res) {
           Type_dechets: docs[i].Type_dechets,
           date_depot: docs[i].date_depot,
           nombre_capacite: docs[i].nombre_capacite,
-          image: docs[i].image,
+          adresse: docs[i].adresse,
         });
       }
       res.status(200).json(list);
@@ -24,20 +24,21 @@ export function getAll(req, res) {
 
 export function addOnce(req, res) {
   if (!validationResult(req).isEmpty()) {
-    res.status(400).json({ errors: validationResult(req).array() });
-  } else {
+    return res.status(400).json({ errors: validationResult(req).array() });
+} else {
     Dechets.create({
         Type_dechets: req.body.Type_dechets,
         date_depot: req.body.date_depot,
         nombre_capacite: req.body.nombre_capacite,
-      image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`,
+        adresse: req.body.adresse,
+
     })
       .then((newDechets) => {
         res.status(200).json({
             Type_dechets: newDechets.Type_dechets,
             date_depot: newDechets.date_depot,
             nombre_capacite: newDechets.nombre_capacite,
-          image: newDechets.image,
+          adresse: newDechets.adresse,
         });
       })
       .catch((err) => {
@@ -63,6 +64,8 @@ export function putOnce(req, res) {
         Type_dechets: req.body.Type_dechets,
         date_depot: req.body.date_depot,
         nombre_capacite: req.body.nombre_capacite,
+        adresse: req.body.adresse,
+
     }
   }
   else {
@@ -70,7 +73,7 @@ export function putOnce(req, res) {
         Type_dechets: req.body.Type_dechets,
         date_depot: req.body.date_depot,
         nombre_capacite: req.body.nombre_capacite,
-      image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`
+        adresse: req.body.adresse,
     }
   }
   Dechets.findByIdAndUpdate(req.params.id, newDechets)
