@@ -26,6 +26,9 @@ const userSchema = new Schema(
         cin: {
             type: String
         },
+        numTel: {
+            type:  Number
+        },
         userName: {
             type: String
         },
