@@ -1,5 +1,6 @@
 import express from "express";
 import { body } from "express-validator";
+import upload from '../middlewares/multer-config.js';
 
 import {
   getAllUsers,
@@ -18,8 +19,9 @@ router.get("/", getAllUsers);
 // Route pour créer un nouvel utilisateur
 router.post(
   "/",
-  body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
+  
+  body('email').isEmail(),
+  body('password').isLength({ min: 6 }),
   addUser
 );
 

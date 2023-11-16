@@ -3,7 +3,9 @@ import User from '../models/user.js';
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
+import cloudinary from 'cloudinary';
 
+import upload from '../middlewares/mm.js'; // Update this import based on your file structure
 
 //configuration nodemailer 
 const transporter = nodemailer.createTransport({
@@ -13,12 +15,17 @@ const transporter = nodemailer.createTransport({
     pass: '223AMT0874',
   },
 });
-
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: 'dznvwntjn',
+  api_key: '972319243848173',
+  api_secret: 'xp2G8BXbjvjec0dbFIaQbUJ3Mj8',
+  secure: true,
+});
 
 //recover all users
 export function getAllUsers(req, res) {
-  authenticateUser(req, res, () => {
-    authorizeAdmin(req, res, () => {
+ 
    
   User.find({})
     .then((users) => {
@@ -43,15 +50,13 @@ export function getAllUsers(req, res) {
     .catch((err) => {
       res.status(500).json({ error: err });
     });
-  });
-});
+
 }
 // add user
-export function addUser(req, res) {
+
+
+export async function addUser(req, res) {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
 
   const {
     email,
@@ -64,57 +69,52 @@ export function addUser(req, res) {
     userName,
     lastPassword,
     isValid,
-    imageRes,
     role,
   } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hashedPassword) => {
-      return User.create({
-        email,
-        password: hashedPassword,
-        nom,
-        prenom,
-        dateNaissance,
-        adress,
-        cin,
-        userName,
-        lastPassword,
-        isValid,
-        imageRes,
-        role,
-      });
-    })
-    .then((newUser) => {
+  try {
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Read the HTML content from a file
-      // Envoi de l'e-mail de bienvenue
-      const mailOptions = {
-        from: 'votre-email@gmail.com',
-        to: newUser.email,
-        subject: 'Bienvenue sur votre application',
-        text: 'Merci de vous être inscrit sur notre application. Bienvenue!',
-       
-    
-  
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error(error);
-          // Si l'envoi de l'e-mail échoue, cela ne bloque pas la réponse au client
-        } else {
-          console.log('E-mail de bienvenue envoyé : ' + info.response);
-        }
-      });
-
-      res.status(200).json(newUser);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).json({ error: 'Internal Server Error' });
+    // Create user without Cloudinary image URL
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      nom,
+      prenom,
+      dateNaissance,
+      adress,
+      cin,
+      userName,
+      lastPassword,
+      isValid,
+      role,
     });
+
+    // Send welcome email
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: newUser.email,
+      subject: 'Welcome to your application',
+      text: 'Thank you for registering on our application. Welcome!',
+    };
+
+    transporter.sendMail(mailOptions, (emailError, info) => {
+      if (emailError) {
+        console.error(emailError);
+      } else {
+        console.log('Welcome email sent: ' + info.response);
+      }
+    });
+
+    res.status(200).json(newUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }
+
+
 
 export function getUserById(req, res) {
   User.findById(req.params.id)
@@ -158,7 +158,8 @@ export function updateUserById(req, res) {
           if (!updatedUser) {
             res.status(404).json({ message: 'Utilisateur introuvable' });
           } else {
-            res.status(200).json(updatedUser);
+            res.status(200).json({ data: updatedUser, message: 'User updated successfully' });
+
           }
         })
         .catch((err) => {
