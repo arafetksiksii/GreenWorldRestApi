@@ -1,28 +1,28 @@
-# Gamification Feature
+# GreenWorldRestApi
 
-Developed by: Walid Bouzouita
+## Description
+Green World is a comprehensive mobile application focused on raising environmental awareness, promoting sustainable living, and empowering users to take action in real-time against ecological threats. Conceived by a dedicated team, it aims to serve as a crucial tool in the global effort to protect our planet. It enables users to monitor environmental activities, report incidents like illegal deforestation, pollution, or loss of biodiversity, and facilitates immediate action by notifying relevant authorities.
 
-## Overview
-The Gamification feature developed by Walid Bouzouita is a key component of the GreenWorldRestApi designed to engage users in environmental stewardship through interactive and educational games. These games aim to increase knowledge about biodiversity, encourage sustainable practices, and foster a deeper connection between users and environmental issues.
+## Objectives
+Our mission is to provide an engaging and educational experience that encourages users to contribute actively to environmental preservation. Green World combines real-time environmental monitoring with a user-friendly interface to foster a proactive community for Earth's protection.
 
 ## Features
+- **Real-time Environmental Monitoring**: Track and report environmental activities and incidents.
+- **User Engagement**: Interactive platform with social networking features for sharing and community building.
+- **Informative Dashboards**: Live updates on environmental issues and incident reports.
+- **Gamification**: Engage users with educational games about biodiversity and ecological challenges.
 
-### Educational Quizzes and Challenges
-- Interactive quizzes cover a wide range of environmental topics, testing and expanding users’ knowledge.
-- Challenges prompt users to engage in real-world environmental protection activities, reinforcing learning through action.
+## Team
+- Aymen Zouaoui
+- Chaima Eljed
+- Arafet Ksiksi
+- Chaima Saadallah
+- Walid Bouzouita
 
-### Leaderboards and Achievements
-- Users can see where they stand in a competitive leaderboard that ranks participants based on their quiz scores and challenge completions.
-- Achievements and badges are awarded to recognize users' efforts and milestones in their environmental education journey.
+## Installation
+Instructions for setting up the API locally:
 
-### User Engagement
-- The feature is designed to be fun and engaging, encouraging repeat use and long-term engagement with the application.
-- Social sharing options enable users to celebrate their achievements and challenge friends, spreading awareness and fostering a community of environmentally conscious users.
-
-### Integration with Environmental Actions
-- Gamification elements are tied to real-life environmental actions, providing incentives for users to make a tangible impact on their surroundings.
-- The system tracks users’ progress and provides feedback, motivating continuous improvement and learning.
-
-## Contact
-For further details or to provide feedback on the Gamification feature, please contact Walid Bouzouita at [bouzouitawalid181@gmail.com].
-
+```bash
+git clone https://github.com/arafetksiksii/GreenWorldRestApi
+cd GreenWorldRestApi
+# Follow the setup instructions detailed below

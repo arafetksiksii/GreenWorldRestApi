@@ -1,6 +1,6 @@
 FROM node:16
 
-LABEL maintainer="Abdel Monem Aissa <abdelmonem.aissa@esprit.tn>"
+LABEL maintainer="aymen zouaoui<zouaoui.aymen@esprit.tn>"
 
 RUN mkdir -p /home/node/app && chown -R node:node /home/node/app
 
