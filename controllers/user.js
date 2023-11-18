@@ -147,10 +147,7 @@ export function updateUserById(req, res) {
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
-
-  // Use the authentication middleware before the authorization middleware
-  authenticateUser(req, res, () => {
-    authorizeAdmin(req, res, async () => {
+ 
       try {
         const updatedUserData = {
           email: req.body.email,
@@ -169,11 +166,11 @@ export function updateUserById(req, res) {
         // Handle image upload
         if (req.body.imageRes) {
           const imageData = req.body.imageRes;
-          const imageRes = await uploadImage(imageData);
+          const imageRes =  uploadImage(imageData);
           updatedUserData.imageRes = imageRes;
         }
 
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
+        const updatedUser =  User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
 
         if (!updatedUser) {
           return res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -184,8 +181,8 @@ export function updateUserById(req, res) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
       }
-    });
-  });
+  
+ 
 }
 
 export function deleteUserById(req, res) {
@@ -208,44 +205,31 @@ export function deleteUserById(req, res) {
 // ...
 
 
+export function updateScoreById(req, res) {
+  
 
-export function updateProfilById(req, res) {
-  if (!validationResult(req).isEmpty()) {
-    return res.status(400).json({ errors: validationResult(req).array() });
+ 
+
+  // Check if the request body contains the "score" attribute
+  if (!req.body.score) {
+    return res.status(400).json({ message: 'Bad Request - Score is required' });
   }
 
-  // Use the authentication middleware before the authorization middleware
-  authenticateUser(req, res, () => {
-    // Check if the authenticated user is the same as the user being updated
-    if (req.user.id !== req.params.id) {
-      return res.status(403).json({ message: 'Forbidden - You are not allowed to modify this user' });
-    }
+  const updatedUserData = {
+    score: req.body.score,
+  };
 
-    const updatedUserData = {
-      email: req.body.email,
-      password: req.body.password,
-      nom: req.body.nom,
-      prenom: req.body.prenom,
-      dateNaissance: req.body.dateNaissance,
-      adress: req.body.adress,
-      cin: req.body.cin,
-      userName: req.body.userName,
-      lastPassword: req.body.lastPassword,
-      isValid: req.body.isValid,
-      imageRes: req.body.imageRes, 
-      role: req.body.role,
-    };
-
-    User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true })
-      .then((updatedUser) => {
-        if (!updatedUser) {
-          res.status(404).json({ message: 'Utilisateur introuvable' });
-        } else {
-          res.status(200).json(updatedUser);
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({ error: err });
-      });
-  });
+  User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true })
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        res.status(404).json({ message: 'Utilisateur introuvable' });
+      } else {
+        res.status(200).json(updatedUser);
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err });
+    });
 }
+
+

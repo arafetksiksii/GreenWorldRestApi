@@ -8,7 +8,7 @@ import {
   getUserById,
   updateUserById,
   deleteUserById,
-  updateProfilById,
+  updateScoreById,
 
 } from "../controllers/user.js"; // Assurez-vous d'importer les bonnes fonctions du controller
 
@@ -39,9 +39,8 @@ router.put(
 // Route to update a user's profile by ID
 router.put(
   "/updateProfilById/:id",  // New route path
-  body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
-  updateProfilById
+ 
+  updateScoreById
 );
 
 // Route pour supprimer un utilisateur par ID
