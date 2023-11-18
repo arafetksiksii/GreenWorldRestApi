@@ -1,6 +1,6 @@
 import express from "express";
 import { body } from "express-validator";
-import upload from '../middlewares/multer-config.js';
+
 
 import {
   getAllUsers,
@@ -9,6 +9,7 @@ import {
   updateUserById,
   deleteUserById,
   updateProfilById,
+
 } from "../controllers/user.js"; // Assurez-vous d'importer les bonnes fonctions du controller
 
 const router = express.Router();
@@ -45,5 +46,7 @@ router.put(
 
 // Route pour supprimer un utilisateur par ID
 router.delete("/:id", deleteUserById);
+
+
 
 export default router;

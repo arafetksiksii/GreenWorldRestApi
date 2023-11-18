@@ -48,7 +48,7 @@ app.use('/auth', authRoutes); // Monter les routes d'authentification
 app.use('/user', userRoutes);
 app.use('/produit', produitRoutes);
 app.use('/dechets', dechetsRoutes);
-app.use('/demande', demandeRoutes);
+
 app.use('/quiz', quizRoutes);
 app.use('/question', questionRoutes);
 app.use('/resultatQuiz', resultatQuizRoutes);
@@ -58,5 +58,5 @@ app.use(notFoundError);
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Server running at http:// 192.168.1.16:9090  :${port}/`);
+  console.log(`Server running at http://localhost::${port}/`);
 });

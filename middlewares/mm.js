@@ -1,36 +1,26 @@
-import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+// Import necessary modules from the 'cloudinary' package
+import { v2 as cloudinary } from 'cloudinary';
 
+// Configure Cloudinary with your credentials
+cloudinary.config({
+  cloud_name: 'dznvwntjn',
+  api_key: '972319243848173',
+  api_secret: 'xp2G8BXbjvjec0dbFIaQbUJ3Mj8',
+  secure: true,
+});
 
-const useCloudinary = process.env.USE_CLOUDINARY === 'true'; // Add this line
+// Function to upload an image to Cloudinary
+const uploadImage = async (imageData) => {
+  try {
+    // Upload the image to Cloudinary
+    const result = await cloudinary.uploader.upload(imageData, { folder: 'pdm' });
 
-let upload;
+    // Return the Cloudinary response
+    return result;
+  } catch (error) {
+    console.error('Error uploading image to Cloudinary:', error);
+    throw error;
+  }
+};
 
-if (useCloudinary) {
-  // Use Cloudinary storage if the flag is set
-  const cloudinaryStorage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'pdm',
-      format: async (req, file) => 'png',
-      public_id: (req, file) => `${Date.now()}_${file.originalname}`,
-    },
-  });
-
-  upload = multer({ storage: cloudinaryStorage });
-} else {
-  // Use local storage if the flag is not set
-  upload = multer({
-    storage: multer.diskStorage({
-      destination: (req, file, callback) => {
-        callback(null, join(__dirname, "../public/images"));
-      },
-      filename: (req, file, callback) => {
-        const name = file.originalname.split(' ').join('_');
-        callback(null, name + Date.now());
-      },
-    }),
-  });
-}
-
-export default upload;
+export { uploadImage };

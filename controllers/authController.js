@@ -72,128 +72,58 @@ router.post('/logout', (req, res) => {
 
 ///
 
-
-export async function verifyResetCode(req, res) {
-  const errors = validationResult(req);
-
-  const { email, resetCode, token, newPassword } = req.body;
-
-  try {
-    // Find the user by email, reset code, and token
-    const user = await User.findOne({ email, resetCode, resetToken: token });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid reset code, token, or email' });
-    }
-
-    // Check if the token is expired
-    const decodedToken = jwt.verify(token, 'your-reset-secret-key');
-    if (Date.now() >= decodedToken.exp * 1000) {
-      return res.status(401).json({ message: 'Token expired' });
-    }
-
-    // Update the user's password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-
-    // Clear the reset code and token from the user in the database
-    user.resetCode = undefined;
-    user.resetToken = undefined;
-    await user.save();
-
-    res.json({ message: 'Password reset successful' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-}
-
-
-/////
-
-/*
-export async function sendResetCode(req, res) {
-  const errors = validationResult(req);
-
+// Add this route to your router
+router.post('/forgetpassword', async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Generate a 5-digit reset code
-    const resetCode = generateResetCode();
+    // Choose either email or SMS to send the reset code
+    // Uncomment the desired method (email or SMS)
 
-    // Generate a JWT token
-    const token = jwt.sign({ email, resetCode }, 'your-reset-secret-key', { expiresIn: '15m' }); // Set an appropriate expiration time
-
-    // Save the reset code and token to the user document
-    user.resetCode = resetCode;
-    user.resetToken = token;
-    await user.save();
-
-    // Send the reset code and token via email
+    // Email method
+    /*
+    const resetToken = jwt.sign({ email, resetCode: generateResetCode() }, 'your-reset-secret-key', { expiresIn: '15m' });
     const mailOptions = {
       from: 'your-email@gmail.com',
       to: email,
       subject: 'Password Reset Code',
-      text: `Your password reset code is: ${resetCode}. Use the following token for verification: ${token}`,
+      text: `Your password reset code is: ${resetToken}`,
     };
-
     transporter.sendMail(mailOptions, (emailError, info) => {
       if (emailError) {
         console.error(emailError);
         return res.status(500).json({ error: 'Error sending reset code via email' });
       }
-
-      console.log('Reset code and token sent via email:', resetCode, token);
-      res.status(200).json({ message: 'Reset code and token sent successfully' });
+      console.log('Reset code sent via email:', resetToken);
+      res.status(200).json({ message: 'Reset code sent successfully' });
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-}
-*/
-export async function sendResetCode(req, res) {
-  const errors = validationResult(req);
+    */
 
-  const { email } = req.body;
-
-  try {
-    // Find the user by email
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Get the user's phone number
-    const numTel = user.numTel;
-
-    // Generate a 5-digit reset code
+    // SMS method
     const resetCode = generateResetCode();
-
-    // Save the reset code to the user document
-    user.resetCode = resetCode;
-    await user.save();
-
-    // Send the reset code via SMS using Twilio
     await twilioClient.messages.create({
       body: `Your password reset code is: ${resetCode}`,
-      from: 'your-twilio-phone-number',
-      to: numTel,
+      from: '21695398941',
+      to: user.numTel,
     });
 
     console.log('Reset code sent via SMS:', resetCode);
+    user.resetCode = resetCode;
+    await user.save();
+    
     res.status(200).json({ message: 'Reset code sent successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-}
+});
+
+
+
 export default router;

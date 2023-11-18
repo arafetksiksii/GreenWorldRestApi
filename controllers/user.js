@@ -3,11 +3,9 @@ import User from '../models/user.js';
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
-import cloudinary from 'cloudinary';
+import {uploadImage  } from '../middlewares/mm.js';
 
-import upload from '../middlewares/mm.js'; // Update this import based on your file structure
 
-//configuration nodemailer 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -15,13 +13,7 @@ const transporter = nodemailer.createTransport({
     pass: '223AMT0874',
   },
 });
-// Configure Cloudinary
-cloudinary.v2.config({
-  cloud_name: 'dznvwntjn',
-  api_key: '972319243848173',
-  api_secret: 'xp2G8BXbjvjec0dbFIaQbUJ3Mj8',
-  secure: true,
-});
+
 
 //recover all users
 export function getAllUsers(req, res) {
@@ -54,10 +46,9 @@ export function getAllUsers(req, res) {
 }
 // add user
 
-
 export async function addUser(req, res) {
   const errors = validationResult(req);
-
+  console.log(req.body);
   const {
     email,
     password,
@@ -71,8 +62,15 @@ export async function addUser(req, res) {
     isValid,
     role,
   } = req.body;
-
+  const imageData = req.body.imageRes;
+  const imageRes = await await uploadImage(imageData);
   try {
+    // Check if the email already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already exists. Please choose another email.' });
+    }
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -88,6 +86,7 @@ export async function addUser(req, res) {
       userName,
       lastPassword,
       isValid,
+      imageRes,
       role,
     });
 
@@ -97,6 +96,9 @@ export async function addUser(req, res) {
       to: newUser.email,
       subject: 'Welcome to your application',
       text: 'Thank you for registering on our application. Welcome!',
+      html: `
+      <!-- Your HTML email content -->
+    `,
     };
 
     transporter.sendMail(mailOptions, (emailError, info) => {
@@ -113,8 +115,6 @@ export async function addUser(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
-
 
 export function getUserById(req, res) {
   User.findById(req.params.id)
@@ -230,5 +230,3 @@ export function updateProfilById(req, res) {
       });
   });
 }
-
-

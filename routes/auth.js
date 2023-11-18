@@ -4,6 +4,7 @@ import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user.js'; // Assurez-vous que le chemin du fichier est correct
+import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
@@ -19,19 +20,46 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email } = req.body;
+    const { email,resetCode } = req.body;
 
     try {
-      // Logique d'envoi du code de réinitialisation ici
-      // Vous pouvez utiliser la bibliothèque nodemailer, twilio, etc.
+      const user = await User.findOne({ email });
 
-      res.json({ message: 'Reset code sent successfully' });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const resetCode = generateResetCode();
+
+      const mailOptions = {
+        from: 'your-email@gmail.com',
+        to: email,
+        subject: 'Password Reset Code',
+        text: `Your password reset code is: ${resetCode}`,
+      };
+
+      transporter.sendMail(mailOptions, (emailError, info) => {
+        if (emailError) {
+          console.error(emailError);
+          return res.status(500).json({ error: 'Error sending reset code via email' });
+        }
+
+        console.log('Reset code sent via email:', resetCode);
+
+        // Save the reset code in the user document
+        user.resetCode = resetCode;
+        user.save();
+
+        // Return the user along with the reset code
+        res.json(user);
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   }
 );
+
 
 router.post(
   '/verifyResetCode',
@@ -66,5 +94,14 @@ router.post(
     }
   }
 );
-
+function generateResetCode() {
+  return Math.floor(10000 + Math.random() * 90000);
+}
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'aymen.zouaoui@esprit.tn',
+    pass: '223AMT0874',
+  },
+});
 export default router;

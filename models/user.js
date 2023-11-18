@@ -26,10 +26,14 @@ const userSchema = new Schema(
         cin: {
             type: String
         },
-        numTel: {
-            type:  Number
+        
+        resetCode: {
+            type:  String
         },
         userName: {
+            type: String
+        },
+        numTel: {
             type: String
         },
         lastPassword: {
@@ -40,6 +44,9 @@ const userSchema = new Schema(
             default: true
         },
         imageRes: {
+            type: String
+        },
+        resetToken: {
             type: String
         },
         role: {
