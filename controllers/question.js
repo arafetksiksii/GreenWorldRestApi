@@ -72,6 +72,28 @@ export function updateQuestionById(req, res) {
     });
 }
 
+
+
+export function getQuestionsByQuizId(req, res) {
+    const quizId = req.params.id_quiz;
+    console.log("Requête reçue pour l'ID de quiz:", quizId);
+
+    Question.find({ id_quiz: quizId })
+        .then(questions => {
+            if (!questions.length) {
+                console.log("Aucune question trouvée pour l'ID de quiz:", quizId);
+                return res.status(404).json({ message: 'Aucune question trouvée pour ce quiz' });
+            }
+            console.log(questions.length, "questions trouvées pour l'ID de quiz:", quizId);
+            res.status(200).json(questions);
+        })
+        .catch(err => {
+            console.error("Erreur lors de la recherche de questions:", err);
+            res.status(500).json({ error: err });
+        });
+}
+
+
 export function deleteQuestionById(req, res) {
     Question
     .findByIdAndRemove(req.params.id_question)
@@ -85,3 +107,8 @@ export function deleteQuestionById(req, res) {
         res.status(500).json({ error: err });
     });
 }
+
+
+
+
+

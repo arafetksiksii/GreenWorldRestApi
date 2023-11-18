@@ -4,8 +4,9 @@ const { Schema, model } = mongoose;
 const DechetsSchema = new Schema(
     {
         Type_dechets: {
-            type: String,
-            required: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Type',
+            require: true,
         },
         date_depot: {
             type: Date,
@@ -15,7 +16,7 @@ const DechetsSchema = new Schema(
             type: Number,
             required: true
         },
-        image: {
+        adresse: {
             type: String,
             required: true
         }

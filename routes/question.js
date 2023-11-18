@@ -6,7 +6,9 @@ import {
   addQuestion,
   getQuestionById,
   updateQuestionById,
-  deleteQuestionById,
+  getQuestionsByQuizId,
+  deleteQuestionById
+  
   
 } from "../controllers/question.js"; // Assurez-vous d'importer les bonnes fonctions du controller
 
@@ -35,6 +37,9 @@ router.put(
   body("reponse_correcte").notEmpty(),
   updateQuestionById
 );
+
+// Route pour obtenir les questions par ID de quiz
+router.get('/aaa/:id_quiz', getQuestionsByQuizId);
 
 // Route pour supprimer une question par ID
 router.delete("/:id_question", deleteQuestionById);

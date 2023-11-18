@@ -10,7 +10,7 @@ import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
 import userRoutes from './routes/user.js';
 import dechetsRoutes from './routes/dechets.js';
-import demandeRoutes from './routes/demande.js';
+import TypeRoutes from './routes/type.js';
 import eventRoutes from './routes/event.js';
 import CommentRoute from './routes/comment.js';
 import bodyParser from 'body-parser';
