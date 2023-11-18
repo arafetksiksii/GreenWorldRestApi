@@ -47,34 +47,44 @@ export function getAllUsers(req, res) {
 // add user
 
 export async function addUser(req, res) {
-  const errors = validationResult(req);
-  console.log(req.body);
-  const {
-    email,
-    password,
-    nom,
-    prenom,
-    dateNaissance,
-    adress,
-    cin,
-    userName,
-    lastPassword,
-    isValid,
-    role,
-  } = req.body;
-  const imageData = req.body.imageRes;
-  const imageRes = await await uploadImage(imageData);
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {
+      email,
+      password,
+      nom,
+      prenom,
+      dateNaissance,
+      adress,
+      cin,
+      userName,
+      lastPassword,
+      isValid,
+      role,
+    } = req.body;
+
     // Check if the email already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists. Please choose another email.' });
     }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user without Cloudinary image URL
+    // Handle image upload
+    const imageData = req.body.imageRes;
+    const cloudinaryResponse = await uploadImage(imageData);
+    
+    // Assuming that the image URL is in the secure_url property of the Cloudinary response
+    const imageUrl = cloudinaryResponse.secure_url;
+
+    // Create user with Cloudinary image URL
     const newUser = await User.create({
       email,
       password: hashedPassword,
@@ -86,7 +96,7 @@ export async function addUser(req, res) {
       userName,
       lastPassword,
       isValid,
-      imageRes,
+      imageRes: imageUrl,
       role,
     });
 
@@ -111,11 +121,15 @@ export async function addUser(req, res) {
 
     res.status(200).json(newUser);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    if (error.name === 'ValidationError') {
+      console.error('Validation Errors:', error.errors);
+      res.status(400).json({ errors: error.errors });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 }
-
 export function getUserById(req, res) {
   User.findById(req.params.id)
     .then((user) => {
@@ -136,35 +150,40 @@ export function updateUserById(req, res) {
 
   // Use the authentication middleware before the authorization middleware
   authenticateUser(req, res, () => {
-    authorizeAdmin(req, res, () => {
-      const updatedUserData = {
-        email: req.body.email,
-        password: req.body.password,
-        nom: req.body.nom,
-        prenom: req.body.prenom,
-        dateNaissance: req.body.dateNaissance,
-        adress: req.body.adress,
-        cin: req.body.cin,
-        userName: req.body.userName,
-        lastPassword: req.body.lastPassword,
-        isValid: req.body.isValid,
-        imageRes: req.body.imageRes, 
-       // imageRes:`http://127.0.0.1/img/${req.file.filename}`
-        role: req.body.role,
-      };
+    authorizeAdmin(req, res, async () => {
+      try {
+        const updatedUserData = {
+          email: req.body.email,
+          password: req.body.password,
+          nom: req.body.nom,
+          prenom: req.body.prenom,
+          dateNaissance: req.body.dateNaissance,
+          adress: req.body.adress,
+          cin: req.body.cin,
+          userName: req.body.userName,
+          lastPassword: req.body.lastPassword,
+          isValid: req.body.isValid,
+          role: req.body.role,
+        };
 
-      User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true })
-        .then((updatedUser) => {
-          if (!updatedUser) {
-            res.status(404).json({ message: 'Utilisateur introuvable' });
-          } else {
-            res.status(200).json({ data: updatedUser, message: 'User updated successfully' });
+        // Handle image upload
+        if (req.body.imageRes) {
+          const imageData = req.body.imageRes;
+          const imageRes = await uploadImage(imageData);
+          updatedUserData.imageRes = imageRes;
+        }
 
-          }
-        })
-        .catch((err) => {
-          res.status(500).json({ error: err });
-        });
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
+
+        if (!updatedUser) {
+          return res.status(404).json({ message: 'Utilisateur introuvable' });
+        }
+
+        res.status(200).json({ data: updatedUser, message: 'User updated successfully' });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
     });
   });
 }
