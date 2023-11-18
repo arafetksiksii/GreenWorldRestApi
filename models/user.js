@@ -35,7 +35,10 @@ const userSchema = new Schema(
         },
         numTel: {
             type: String
-        },
+        },  score: {
+            type: Number,
+            default: 0,
+          },
         lastPassword: {
             type: String
         },
