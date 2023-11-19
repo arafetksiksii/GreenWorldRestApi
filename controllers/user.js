@@ -78,7 +78,7 @@ export async function addUser(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Handle image upload
-    const imageData = req.body.imageRes;
+    const imageData = req.body.imageRes || 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
     const cloudinaryResponse = await uploadImage(imageData);
     
     // Assuming that the image URL is in the secure_url property of the Cloudinary response
@@ -208,21 +208,29 @@ export function deleteUserById(req, res) {
 export function updateScoreById(req, res) {
   
 
- 
 
   // Check if the request body contains the "score" attribute
   if (!req.body.score) {
+    console.log(req.body.score)
     return res.status(400).json({ message: 'Bad Request - Score is required' });
+    
+  }
+
+  if (!req.body.id) {
+    console.log(req.body.id)
+
+    return res.status(400).json({ message: 'Bad Request - id is required' });
   }
 
   const updatedUserData = {
     score: req.body.score,
   };
 
-  User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true })
+  User.findByIdAndUpdate(req.body.id, updatedUserData, { new: true })
     .then((updatedUser) => {
       if (!updatedUser) {
         res.status(404).json({ message: 'Utilisateur introuvable' });
+        console.log("ccccc")
       } else {
         res.status(200).json(updatedUser);
       }

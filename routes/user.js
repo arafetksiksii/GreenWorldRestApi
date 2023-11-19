@@ -29,16 +29,10 @@ router.post(
 // Route pour obtenir les détails d'un utilisateur par ID
 router.get("/:id", getUserById,);
 
-// Route pour mettre à jour un utilisateur par ID
-router.put(
-  "/:id",
-  body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
-  updateUserById,
-);
+
 // Route to update a user's profile by ID
 router.put(
-  "/updateProfilById/:id",  // New route path
+  "/updateProfilById",  // New route path
  
   updateScoreById
 );
