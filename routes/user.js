@@ -29,7 +29,11 @@ router.post(
 // Route pour obtenir les détails d'un utilisateur par ID
 router.get("/:id", getUserById,);
 
-
+// Route pour mettre à jour un utilisateur par ID
+router.put(
+  "/",
+  updateUserById,
+);
 // Route to update a user's profile by ID
 router.put(
   "/updateProfilById",  // New route path

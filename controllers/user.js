@@ -143,46 +143,41 @@ export function getUserById(req, res) {
       res.status(500).json({ error: err });
     });
 }
-export function updateUserById(req, res) {
+export async function updateUserById(req, res) {
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
- 
-      try {
-        const updatedUserData = {
-          email: req.body.email,
-          password: req.body.password,
-          nom: req.body.nom,
-          prenom: req.body.prenom,
-          dateNaissance: req.body.dateNaissance,
-          adress: req.body.adress,
-          cin: req.body.cin,
-          userName: req.body.userName,
-          lastPassword: req.body.lastPassword,
-          isValid: req.body.isValid,
-          role: req.body.role,
-        };
+console.log(req.body)
+  try {
+    const updatedUserData = {
+      email: req.body.email,
+      nom: req.body.nom,
+      prenom: req.body.prenom,
+      adress: req.body.adress,
+      cin: req.body.cin,
+      userName: req.body.userName,
+      imageRes: req.body.imageRes,
+    };
+/*
+    // Handle image upload
+    if (req.body.imageRes) {
+      const imageData = req.body.imageRes;
+      const imageRes = await uploadImage(imageData);
+      updatedUserData.imageRes = imageRes;
+    }
+*/
+    // Utilisez 'await' pour attendre que la mise à jour soit effectuée
+    const updatedUser = await User.findByIdAndUpdate(req.body.id, updatedUserData, { new: true });
 
-        // Handle image upload
-        if (req.body.imageRes) {
-          const imageData = req.body.imageRes;
-          const imageRes =  uploadImage(imageData);
-          updatedUserData.imageRes = imageRes;
-        }
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
+    }
 
-        const updatedUser =  User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
-
-        if (!updatedUser) {
-          return res.status(404).json({ message: 'Utilisateur introuvable' });
-        }
-
-        res.status(200).json({ data: updatedUser, message: 'User updated successfully' });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-      }
-  
- 
+    res.status(200).json({ data: updatedUser, message: 'User updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }
 
 export function deleteUserById(req, res) {
