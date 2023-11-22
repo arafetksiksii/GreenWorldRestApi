@@ -16,9 +16,8 @@ const transporter = nodemailer.createTransport({
 
 
 //recover all users
-export function getAllUsers(req, res) {
- 
-   
+export  function getAllUsers(req, res) {
+  authenticateUser(req, res, () => {
   User.find({})
     .then((users) => {
       let userList = users.map((user) => {
@@ -41,7 +40,7 @@ export function getAllUsers(req, res) {
     })
     .catch((err) => {
       res.status(500).json({ error: err });
-    });
+    }); });
 
 }
 // add user
@@ -144,10 +143,22 @@ export function getUserById(req, res) {
     });
 }
 export async function updateUserById(req, res) {
+  // Utilisez les middlewares d'authentification et d'autorisation
+  // avant d'effectuer les vérifications et les mises à jour
+  await authenticateUser(req, res);
+  await authorizeAdmin(req, res);
+
+  // Vérifiez que l'utilisateur connecté correspond à l'utilisateur à modifier
+  if (req.user.id !== req.body.id) {
+    return res.status(403).json({ error: 'Unauthorized access to user profile' });
+  }
+
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
-console.log(req.body)
+
+  console.log(req.body);
+
   try {
     const updatedUserData = {
       email: req.body.email,
@@ -158,15 +169,9 @@ console.log(req.body)
       userName: req.body.userName,
       imageRes: req.body.imageRes,
     };
-/*
-    // Handle image upload
-    if (req.body.imageRes) {
-      const imageData = req.body.imageRes;
-      const imageRes = await uploadImage(imageData);
-      updatedUserData.imageRes = imageRes;
-    }
-*/
-    // Utilisez 'await' pour attendre que la mise à jour soit effectuée
+
+    // ...
+
     const updatedUser = await User.findByIdAndUpdate(req.body.id, updatedUserData, { new: true });
 
     if (!updatedUser) {

@@ -21,52 +21,56 @@ function generateResetCode() {
 }
 
 const router = express.Router();
-//Login route
+// login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-console.log('Received credentials:', email, password);
+  try {
+    const user = await User.findOne({ email });
 
-try {
-  const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials email' });
+    }
 
-  console.log('User found:', user);
-  
-  if (!user) {
-    console.log('User not found:', email);
-    return res.status(401).json({ message: 'Invalid credentials email' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
+
+    // Update user with JWT token
+    const updatedUser = await User.findByIdAndUpdate(user._id, { token: token }, { new: true });
+
+    // Send the token in the response
+    res.json({ token, user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  console.log('Password comparison result:', isPasswordValid);
- 
-
-  if (!isPasswordValid) {
-    console.log('Invalid password for user:', email);
-    return res.status(401).json({ message: 'Invalid credentials password' });
-  }
-
- // Generate JWT token
- const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
-
- // Log the generated token
- console.log('JWT token:', token);
-
- // Send the token in the response
- res.json(user);
-} catch (error) {
- console.error(error);
- res.status(500).json({ message: 'Internal Server Error' });
-}
 });
 
 
-
 // Logout route
-router.post('/logout', (req, res) => {
-  
-  res.json({ message: 'Logout successful' });
+router.post('/logout', async (req, res) => {
+  // Utiliser le middleware d'authentification
+  await authenticateUser(req, res);
+
+  try {
+    // Obtenir l'identifiant de l'utilisateur connecté
+    const userID = req.user.id;
+
+    // Mettre à jour l'utilisateur en supprimant le token
+    await User.findByIdAndUpdate(userID, { token: null }, { new: true });
+
+    // Envoyer la réponse de déconnexion
+    res.json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 
