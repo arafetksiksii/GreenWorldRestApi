@@ -34,6 +34,7 @@ export  function getAllUsers(req, res) {
           isValid: user.isValid,
           imageRes: user.imageRes,
           role: user.role,
+          numTel:user.numTel,
         };
       });
       res.status(200).json(userList);
@@ -63,6 +64,7 @@ export async function addUser(req, res) {
       userName,
       lastPassword,
       isValid,
+      numTel,
       role,
     } = req.body;
 
@@ -95,8 +97,10 @@ export async function addUser(req, res) {
       userName,
       lastPassword,
       isValid,
+      numTel,
       imageRes: imageUrl,
       role,
+     
     });
 
     // Send welcome email
@@ -145,13 +149,6 @@ export function getUserById(req, res) {
 export async function updateUserById(req, res) {
   // Utilisez les middlewares d'authentification et d'autorisation
   // avant d'effectuer les vérifications et les mises à jour
-  await authenticateUser(req, res);
-  await authorizeAdmin(req, res);
-
-  // Vérifiez que l'utilisateur connecté correspond à l'utilisateur à modifier
-  if (req.user.id !== req.body.id) {
-    return res.status(403).json({ error: 'Unauthorized access to user profile' });
-  }
 
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
@@ -240,4 +237,27 @@ export function updateScoreById(req, res) {
     });
 }
 
+export async function resetPassword(req, res, next) {
+  console.log(req.body);
+  try {
+ 
 
+    // Hacher le mot de passe avec le sel
+    const hash = await bcrypt.hash(req.body.password, 10);
+
+    const user = await User.findByIdAndUpdate(
+      req.body.email,
+      { password: hash },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({ message: 'Password changed!', user });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}

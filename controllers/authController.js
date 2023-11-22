@@ -16,9 +16,7 @@ const transporter = nodemailer.createTransport({
     pass: '223AMT0874',
   },
 });
-function generateResetCode() {
-  return Math.floor(10000 + Math.random() * 90000);
-}
+
 
 const router = express.Router();
 // login route
@@ -45,7 +43,7 @@ router.post('/login', async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(user._id, { token: token }, { new: true });
 
     // Send the token in the response
-    res.json({ token, user: updatedUser });
+    res.json(  updatedUser );
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -76,57 +74,6 @@ router.post('/logout', async (req, res) => {
 
 ///
 
-// Add this route to your router
-router.post('/forgetpassword', async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Choose either email or SMS to send the reset code
-    // Uncomment the desired method (email or SMS)
-
-    // Email method
-    /*
-    const resetToken = jwt.sign({ email, resetCode: generateResetCode() }, 'your-reset-secret-key', { expiresIn: '15m' });
-    const mailOptions = {
-      from: 'your-email@gmail.com',
-      to: email,
-      subject: 'Password Reset Code',
-      text: `Your password reset code is: ${resetToken}`,
-    };
-    transporter.sendMail(mailOptions, (emailError, info) => {
-      if (emailError) {
-        console.error(emailError);
-        return res.status(500).json({ error: 'Error sending reset code via email' });
-      }
-      console.log('Reset code sent via email:', resetToken);
-      res.status(200).json({ message: 'Reset code sent successfully' });
-    });
-    */
-
-    // SMS method
-    const resetCode = generateResetCode();
-    await twilioClient.messages.create({
-      body: `Your password reset code is: ${resetCode}`,
-      from: '21695398941',
-      to: user.numTel,
-    });
-
-    console.log('Reset code sent via SMS:', resetCode);
-    user.resetCode = resetCode;
-    await user.save();
-    
-    res.status(200).json({ message: 'Reset code sent successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 
 

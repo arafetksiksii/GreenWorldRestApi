@@ -49,7 +49,7 @@ const userSchema = new Schema(
         imageRes: {
             type: String
         },
-        resetToken: {
+        resetCode: {
             type: String
         },
         role: {
