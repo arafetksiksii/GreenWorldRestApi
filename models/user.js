@@ -49,6 +49,9 @@ const userSchema = new Schema(
         imageRes: {
             type: String
         },
+        token: {
+            type: String
+        },
         resetCode: {
             type: String
         },
@@ -57,6 +60,7 @@ const userSchema = new Schema(
             enum: ['admin', 'user'],
             default: 'user'
         }
+
     },
     {
         timestamps: true

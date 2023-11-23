@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import produitRoutes from './routes/produit.js';
+import commandeRoutes from './routes/commande.js';
+import favproduitRoutes from './routes/produit.js';
 import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
@@ -47,6 +49,9 @@ app.use('/auth', authController); // Ajout de la route d'authentification
 app.use('/auth', authRoutes); // Monter les routes d'authentification
 app.use('/user', userRoutes);
 app.use('/produit', produitRoutes);
+app.use('/commande', commandeRoutes);
+app.use('/favproduit', favproduitRoutes);
+
 app.use('/dechets', dechetsRoutes);
 
 app.use('/quiz', quizRoutes);
