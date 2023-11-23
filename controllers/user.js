@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import {uploadImage  } from '../middlewares/mm.js';
 
-
+import jwt from 'jsonwebtoken';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 //recover all users
 export  function getAllUsers(req, res) {
-  authenticateUser(req, res, () => {
+ // authenticateUser(req, res, () => {
   User.find({})
     .then((users) => {
       let userList = users.map((user) => {
@@ -41,7 +41,7 @@ export  function getAllUsers(req, res) {
     })
     .catch((err) => {
       res.status(500).json({ error: err });
-    }); });
+    }); 
 
 }
 // add user
@@ -239,14 +239,17 @@ export function updateScoreById(req, res) {
 
 export async function resetPassword(req, res, next) {
   console.log(req.body);
+
+  const token = req.body.email;
   try {
- 
+    const decoded = jwt.verify(token, 'your-secret-key'); // Replace 'your-secret-key' with your actual secret key
+    req.user = decoded.user;
 
     // Hacher le mot de passe avec le sel
     const hash = await bcrypt.hash(req.body.password, 10);
 
     const user = await User.findByIdAndUpdate(
-      req.body.email,
+      req.user.id,
       { password: hash },
       { new: true }
     );
@@ -258,6 +261,15 @@ export async function resetPassword(req, res, next) {
     return res.status(200).json({ message: 'Password changed!', user });
   } catch (error) {
     console.error('Error resetting password:', error);
+
+    // Check the type of error thrown by jwt.verify
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token has expired' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Handle other types of errors as needed
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }

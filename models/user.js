@@ -27,9 +27,7 @@ const userSchema = new Schema(
             type: String
         },
         
-        resetCode: {
-            type:  String
-        },
+       
         userName: {
             type: String
         },
@@ -50,6 +48,8 @@ const userSchema = new Schema(
             type: String
         },
         resetCode: {
+            type: String
+        },token: {
             type: String
         },
         role: {

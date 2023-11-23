@@ -45,7 +45,10 @@ router.post(
         }
 
         console.log('Reset code sent via email:', resetCode);
-
+     
+       user.token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
+    
+       
         // Save the reset code in the user document
         user.resetCode = resetCode;
         user.save();
