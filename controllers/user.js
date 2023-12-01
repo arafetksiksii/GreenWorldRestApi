@@ -40,6 +40,10 @@ export function getAllUsers(req, res) {
             role: user.role,
             numTel: user.numTel,
             isBanned: user.isBanned,
+            totalTimeSpent: user.totalTimeSpent,
+            banExpirationDate:user.banExpirationDate,
+            loginCount:user.loginCount
+
           };
         });
         res.status(200).json(userList);

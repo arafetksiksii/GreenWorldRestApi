@@ -172,27 +172,20 @@ router.post('/login', async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials email' });
     }
-
-    // Check if the user is banned and if banExpirationDate is passed
     if (user.isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
-      // If banExpirationDate is passed, unban the user
+  
       user.isBannedTemp = false;
       user.banExpirationDate = null;
       await user.save();
     }
-
-    // Check if the user is banned after potential unban
     if (user.isBanned) {
       return res.status(401).json({ message: 'User is banned' });
     }
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials password' });
     }
 
-    // Record login information in DailyStats collection
     const loginDate = new Date();
     await DailyStats.findOneAndUpdate(
       {
@@ -208,16 +201,12 @@ router.post('/login', async (req, res) => {
       },
       { upsert: true }
     );
-
-    // Increment loginCount for the updatedUser
+   
+    user.lastLoginTimestamp = loginDate;
+    await user.save();
     user.loginCount += 1;
-
-    // Generate JWT token
     const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
-
-    // Update user with JWT token and incremented loginCount
     const updatedUser = await User.findByIdAndUpdate(user._id, { token: token, loginCount: user.loginCount });
-
     res.json(updatedUser);
   } catch (error) {
     console.error(error);
@@ -261,13 +250,14 @@ router.post('/logout', authenticateUser, async (req, res) => {
 
       res.json({ message: 'Logout successful' });
     } else {
-      res.status(400).json({ message: 'User not logged in or login timestamp missing' });
+      res.status(401).json({ message: 'User not logged in or login timestamp missing' });
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
 
 
 // Get logged-in user route
@@ -297,6 +287,86 @@ router.get('/loggeduser', authenticateUser, async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
   }
 });
+
+router.post('/loginiios', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials email' });
+    }
+    // Check if the user is banned and if banExpirationDate is passed
+    if (user.isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
+      // If banExpirationDate is passed, unban the user
+      user.isBannedTemp = false;
+      user.banExpirationDate = null;
+      await user.save();
+    }
+
+    // Check if the user is banned after potential unban
+    if (user.isBanned) {
+      return res.status(401).json({ message: 'User is banned' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials password' });
+    }
+
+    // Record login information in DailyStats collection
+    const loginDate = new Date();
+    await DailyStats.findOneAndUpdate(
+      {
+        userId: user._id,
+        date: {
+          $gte: new Date(loginDate.getFullYear(), loginDate.getMonth(), loginDate.getDate()),
+          $lt: new Date(loginDate.getFullYear(), loginDate.getMonth(), loginDate.getDate() + 1),
+        },
+      },
+      {
+        $inc: { loginCount: 1 },
+        $set: { date: loginDate },
+      },
+      { upsert: true }
+    );
+    user.lastLoginTimestamp = loginDate;
+    await user.save();
+    // Increment loginCount for the updatedUser
+    user.loginCount += 1;
+
+    // Generate JWT token
+    const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
+
+    // Update user with JWT token
+    await User.findByIdAndUpdate(user._id, {
+      token: token,
+      loginCount: user.loginCount,
+    });
+
+    // Send the token in the response along with user details
+    res.json({
+      user: {
+        _id: user._id,
+        email: user.email,
+        nom: user.nom,
+        prenom: user.prenom,
+        token: token,
+        // Include other user details as needed
+      },
+      token: token,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+
+
 
 
 async function getUserDailyStats(userId, date) {
@@ -336,7 +406,32 @@ async function getUserGlobalStatsuser(userId) {
     return { totalLoginCount: 0, totalTimeSpent: 0 };
   }
 }
+// Function to get user daily stats
+router.get('/userdailystats/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const date = new Date();
 
+    const userDailyStats = await getUserDailyStats(userId, date);
+    res.json(userDailyStats);
+  } catch (error) {
+    console.error('Error fetching user daily stats:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+// Function to get user global stats
+router.get('/userglobalstats/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const userGlobalStats = await getUserGlobalStatsuser(userId);
+    res.json({ userGlobalStats });
+  } catch (error) {
+    console.error('Error fetching user global stats:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
 
 
 
@@ -357,22 +452,6 @@ async function getAllUsersGlobalStats() {
     return { totalLoginCount: 0, totalTimeSpent: 0 };
   }
 }
-// Route to get daily and global stats for the logged-in user
-router.get('/userstats/:id', async (req, res) => {
-  try {
-    const userId = req.params.id; // Retrieve the id from route parameters
-    const date = new Date(); // You can replace this with a specific date if needed
-
-    const dailyStats = await getUserDailyStats(userId, date);
-    const globalStats = await getUserGlobalStatsuser(userId);
-
-    res.json({ dailyStats, globalStats });
-  } catch (error) {
-    console.error('Error fetching user stats:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
-  }
-});
-
 // Route to get global stats for all users
 router.get('/allusersstats', async (req, res) => {
   try {
@@ -384,6 +463,5 @@ router.get('/allusersstats', async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
   }
 });
-
 export default router;
 

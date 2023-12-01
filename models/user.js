@@ -75,7 +75,7 @@ const userSchema = new Schema(
     lastLoginTimestamp: Date,
     lastLogoutTimestamp: Date,
     loginCount: {
-      type: Number, // Change the type to Number
+      type: Number, 
       default: 0,
     },
     lastActive: Date,

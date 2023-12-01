@@ -39,7 +39,7 @@ export async function newPassword(req, res) {
     user.password = await bcrypt.hash(newPassword, 10);
 
     await user.save();
-
+/*
     // Send a thank-you email using ChatGPT
     const thankYouEmailPrompt = `Dear ${user.username},\n\nWe would like to thank you for updating your password. If you have any questions or concerns, please feel free to contact us.`;
 
@@ -61,7 +61,7 @@ export async function newPassword(req, res) {
     };
 
     await transporter.sendMail(mailOptions);
-
+*/
     res.json({ message: 'Password updated successfully. Thank you email sent.' });
   } catch (error) {
     console.error(error);
