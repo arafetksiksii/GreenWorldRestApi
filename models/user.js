@@ -27,7 +27,9 @@ const userSchema = new Schema(
             type: String
         },
         
-       
+        resetCode: {
+            type:  String
+        },
         userName: {
             type: String
         },
@@ -47,9 +49,10 @@ const userSchema = new Schema(
         imageRes: {
             type: String
         },
-        resetCode: {
+        token: {
             type: String
-        },token: {
+        },
+        resetCode: {
             type: String
         },
         role: {
@@ -57,6 +60,7 @@ const userSchema = new Schema(
             enum: ['admin', 'user'],
             default: 'user'
         }
+
     },
     {
         timestamps: true

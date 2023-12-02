@@ -4,8 +4,9 @@ import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import {uploadImage  } from '../middlewares/mm.js';
-
+import twilio from 'twilio';
 import jwt from 'jsonwebtoken';
+import e from 'cors';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -14,7 +15,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
+const accountSid = 'ACe97f325708d9f5079f44ba3cfca97f3d';
+const authToken = '7a3001c6bf1c52995b3d22846d74f02c';
+const client = twilio(accountSid, authToken);
 //recover all users
 export  function getAllUsers(req, res) {
  // authenticateUser(req, res, () => {
@@ -41,7 +44,7 @@ export  function getAllUsers(req, res) {
     })
     .catch((err) => {
       res.status(500).json({ error: err });
-    }); 
+    });
 
 }
 // add user
@@ -81,7 +84,7 @@ export async function addUser(req, res) {
     // Handle image upload
     const imageData = req.body.imageRes || 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
     const cloudinaryResponse = await uploadImage(imageData);
-    
+   
     // Assuming that the image URL is in the secure_url property of the Cloudinary response
     const imageUrl = cloudinaryResponse.secure_url;
 
@@ -203,14 +206,14 @@ export function deleteUserById(req, res) {
 
 
 export function updateScoreById(req, res) {
-  
+ 
 
 
   // Check if the request body contains the "score" attribute
   if (!req.body.score) {
     console.log(req.body.score)
     return res.status(400).json({ message: 'Bad Request - Score is required' });
-    
+   
   }
 
   if (!req.body.id) {
@@ -271,5 +274,100 @@ export async function resetPassword(req, res, next) {
 
     // Handle other types of errors as needed
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+  
+}
+// Export the sendResetCodeByTel function
+export async function sendResetCodeByTel(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email } = req.body;
+  console.log(email)
+  try {
+    const user = await User.findOne({ email });
+    console.log(user)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const resetCode = generateResetCode();
+
+    // Send SMS using Twilio
+    client.messages.create({
+      body: `Your password reset code is: ${resetCode}`,
+      from: '+18638247637',
+      to: user.numTel, // Assuming you have a phone field in your user model
+    });
+
+    // Save the reset code in the user document
+    user.resetCode = resetCode;
+    user.save();
+
+    // Create and sign a JWT token
+    const token = jwt.sign({ user: { id: user._id, role: user.role, resetCode } }, 'your-secret-key', { expiresIn: '1h' });
+
+    // Return the user along with the reset code
+    res.json({ user, token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+function generateResetCode() {
+  return Math.floor(1000 + Math.random() * 9000);
+}
+
+
+
+
+export async function sendResetCode(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const resetCode = generateResetCode();
+
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: email,
+      subject: 'Password Reset Code',
+      text: `Your password reset code is: ${resetCode}`,
+    };
+
+    transporter.sendMail(mailOptions, (emailError, info) => {
+      if (emailError) {
+        console.error(emailError);
+        return res.status(500).json({ error: 'Error sending reset code via email' });
+      }
+
+      console.log('Reset code sent via email:', resetCode);
+
+      user.token = jwt.sign({ user: { id: user._id, role: user.role, resetCode: user.resetCode } }, 'your-secret-key', { expiresIn: '1h' });
+
+      // Save the reset code in the user document
+      user.resetCode = resetCode;
+      user.save();
+
+      // Return the user along with the reset code
+      res.json(user);
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 }

@@ -3,14 +3,15 @@ import { validationResult } from "express-validator";
 import Type from "../models/Type.js";
 
 export function getAll(req, res) {
+  
   Type.find({})
     .then((docs) => {
       let list = [];
       for (let i = 0; i < docs.length; i++) {
         list.push({
           id: docs[i]._id,
-          titre: docs[i].title,
-          image_type: docs[i].image,
+          titre: docs[i].titre,
+          image_type: docs[i].image_type,
         });
       }
       res.status(200).json(list);
@@ -21,18 +22,20 @@ export function getAll(req, res) {
 }
 
 export function addOnce(req, res) {
+  console.log(req.body)
   if (!validationResult(req).isEmpty()) {
     res.status(400).json({ errors: validationResult(req).array() });
   } else {
     Type.create({
       titre: req.body.titre,
-      image_type: `http://192.168.1.166:9090/img/${req.file.filename}`,
+      image_type: `http://10.0.2.2:9090/img/${req.file.filename}`
+
     })
       .then((newType) => {
         res.status(200).json({
           titre: newType.titre,
 
-          image_type: newType.image,
+          image_type: newType.image_type,
         });
       })
       .catch((err) => {
@@ -79,6 +82,5 @@ export function putOnce(req, res) {
       res.status(500).json({ error: err });
     });
 }
-
 
 

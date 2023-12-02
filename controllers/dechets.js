@@ -1,5 +1,8 @@
 import { validationResult } from "express-validator";
 
+import nodemailer from 'nodemailer'; // Assurez-vous que nodemailer est installé via npm install nodemailer
+import User from "../models/user.js"; // Assurez-vous d'ajuster le chemin selon votre structure de fichiers
+
 import Dechets from "../models/dechets.js";
 
 export function getAll(req, res) {
@@ -21,7 +24,6 @@ export function getAll(req, res) {
       res.status(500).json({ error: err });
     });
 }
-
 export function addOnce(req, res) {
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
@@ -47,16 +49,16 @@ export function addOnce(req, res) {
   }
 }
 
-export function getOnce(req, res) {
-    Dechets.findById(req.params.id)
-    .then((doc) => {
-      res.status(200).json(doc);
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
-}
 
+export function getOnce(req, res) {
+  Dechets.findById(req.params.id)
+  .then((doc) => {
+    res.status(200).json(doc);
+  })
+  .catch((err) => {
+    res.status(500).json({ error: err });
+  });
+}
 export function putOnce(req, res) {
   let newDechets = {};
   if(req.file == undefined) {

@@ -3,20 +3,6 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'; // Assuming you are using bcrypt for password hashing
 import User from '../models/user.js'; // Import your user model
-import nodemailer from 'nodemailer';
-import twilio from 'twilio';
-
-const twilioClient = twilio('ACe97f325708d9f5079f44ba3cfca97f3d', '933ff12e0a2338fc5389e35f30e5396a');
-
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'aymen.zouaoui@esprit.tn',
-    pass: '223AMT0874',
-  },
-});
-
 
 const router = express.Router();
 // login route
@@ -51,6 +37,7 @@ router.post('/login', async (req, res) => {
 });
 
 
+
 // Logout route
 router.post('/logout', async (req, res) => {
   // Utiliser le middleware d'authentification
@@ -70,11 +57,5 @@ router.post('/logout', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
-
-
-///
-
-
-
 
 export default router;

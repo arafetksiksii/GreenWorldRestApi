@@ -10,6 +10,8 @@ import {
   deleteUserById,
   updateScoreById,
   resetPassword,
+  sendResetCodeByTel,
+  sendResetCode
 
 } from "../controllers/user.js"; // Assurez-vous d'importer les bonnes fonctions du controller
 
@@ -27,6 +29,8 @@ router.post(
   addUser
 );
 
+router.post("/sendResetCode",  sendResetCode);
+router.post("/reset", sendResetCodeByTel,body('numeTel').isNumeric);
 // Route pour obtenir les détails d'un utilisateur par ID
 router.get("/:id", getUserById,);
 

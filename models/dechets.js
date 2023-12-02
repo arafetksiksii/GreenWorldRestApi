@@ -4,12 +4,11 @@ const { Schema, model } = mongoose;
 const DechetsSchema = new Schema(
     {
         Type_dechets: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Type',
-            require: true,
+            type: String,
+            required: true
         },
         date_depot: {
-            type: Date,
+            type: String,
             required: true
         },
         nombre_capacite: {

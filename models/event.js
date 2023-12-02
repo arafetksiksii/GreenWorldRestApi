@@ -7,14 +7,10 @@ const eventSchema = new Schema(
             required: true
         },
         dateDebut: {
-            type: Date,
+            type: String,
             required: true
         },
         dateFin: {
-            type: Date,
-            required: true
-        },
-        image: {
             type: String,
             required: true
         },
@@ -30,10 +26,27 @@ const eventSchema = new Schema(
             type: Number,
             required: true
         },
+        nbPlace: {
+            type: Number,
+            required: true
+        },
+        image: {
+            type: String ,
+            required: true
+        },
+        latitude: {
+            type: Number,
+            required: false
+        },
+        longitude: {
+            type: Number,
+            required: false
+        }
     },
         {
             timesStamps: true //date automatique
         }
+        
 );
     
 export default model("Event", eventSchema);

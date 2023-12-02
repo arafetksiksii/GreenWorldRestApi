@@ -12,9 +12,9 @@ router
   .get(getAll)
   .post(
     multer("image", 5 * 1024 * 1024),
-    body("Type_dechets").isLength({ min: 10 }),
+    body("Type_dechets"),
     body("date_depot"),
-    body("nombre_capacite").isNumeric(),
+    body("nombre_capacite"),
     addOnce
   );
 
@@ -23,9 +23,9 @@ router
   .get(getOnce)
   .put(
     multer("image", 5 * 1024 * 1024),
-    body("Type_dechets").isLength({ min: 10 }),
+    body("Type_dechets"),
     body("date_depot"),
-    body("nombre_capacite").isNumeric(),
+    body("nombre_capacite"),
     putOnce
   );
 

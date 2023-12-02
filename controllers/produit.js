@@ -8,7 +8,7 @@ export function getAll(req, res) {
       let list = [];
       for (let i = 0; i < docs.length; i++) {
         list.push({
-          id: docs[i]._id,
+          _id: docs[i]._id,
           title: docs[i].title,
           description: docs[i].description,
           price: docs[i].price,
