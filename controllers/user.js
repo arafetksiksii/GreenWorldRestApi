@@ -20,10 +20,11 @@ const authToken = '7a3001c6bf1c52995b3d22846d74f02c';
 const client = twilio(accountSid, authToken);
 //recover all users
 export  function getAllUsers(req, res) {
- // authenticateUser(req, res, () => {
+  
+  authenticateUser(req, res, () => {
   User.find({})
     .then((users) => {
-      let userList = users.map((user) => {
+      let userList = users.map((user) => {  
         return {
           id: user._id,
           email: user.email,
@@ -44,7 +45,8 @@ export  function getAllUsers(req, res) {
     })
     .catch((err) => {
       res.status(500).json({ error: err });
-    });
+    }); 
+  });
 
 }
 // add user
