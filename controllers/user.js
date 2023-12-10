@@ -152,10 +152,8 @@ export function getUserById(req, res) {
       res.status(500).json({ error: err });
     });
 }
-export async function updateUserById(req, res) {
-  // Utilisez les middlewares d'authentification et d'autorisation
-  // avant d'effectuer les vérifications et les mises à jour
 
+export async function updateUserById(req, res) {
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
@@ -163,19 +161,16 @@ export async function updateUserById(req, res) {
   console.log(req.body);
 
   try {
-    const updatedUserData = {
-      email: req.body.email,
-      nom: req.body.nom,
-      prenom: req.body.prenom,
-      adress: req.body.adress,
-      cin: req.body.cin,
-      userName: req.body.userName,
-      imageRes: req.body.imageRes,
-    };
+    // Construire dynamiquement l'objet updatedUserData en filtrant les valeurs non nulles
+    const updatedUserData = {};
+    Object.keys(req.body).forEach((key) => {
+      // Vérifier si le champ n'est pas le mot de passe
+      if (key !== 'password' && req.body[key] !== null && req.body[key] !== undefined) {
+        updatedUserData[key] = req.body[key];
+      }
+    });
 
-    // ...
-
-    const updatedUser = await User.findByIdAndUpdate(req.body.email, updatedUserData, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -187,6 +182,8 @@ export async function updateUserById(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
+
 
 export function deleteUserById(req, res) {
   authorizeAdmin(req, res, () => {
@@ -373,5 +370,58 @@ export async function sendResetCode(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+
+
+export async function updatePassword(req, res) {
+  try {
+    // Extraire les champs du corps de la requête
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    // Vérifier que tous les champs requis sont présents
+    if (!req.params.id || !currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ message: 'Veuillez fournir tous les champs requis' });
+    }
+
+    // Récupérer l'utilisateur de la base de données
+    const user = await User.findById(req.params.id);
+
+    // Vérifier si l'utilisateur existe
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur introuvable' });
+    }
+
+    // Vérifier si le mot de passe actuel correspond au mot de passe enregistré
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password || '');
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ message: 'Mot de passe actuel incorrect' });
+    }
+
+    // Vérifier si le nouveau mot de passe est différent de l'ancien et du dernier mot de passe
+    const isSameAsCurrent = await bcrypt.compare(newPassword, user.password || '');
+    const isSameAsLast = await bcrypt.compare(newPassword, user.lastPassword || '');
+
+    if (isSameAsCurrent || isSameAsLast) {
+      return res.status(400).json({ message: 'Le nouveau mot de passe doit être différent de l\'ancien et du dernier mot de passe' });
+    }
+
+    // Vérifier si le nouveau mot de passe est égal à la confirmation du nouveau mot de passe
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ message: 'La confirmation du nouveau mot de passe ne correspond pas' });
+    }
+
+    // Mettre à jour le mot de passe dans la base de données
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.lastPassword = user.password || ''; // Mettre à jour le dernier mot de passe
+    user.password = hashedPassword;
+    await user.save();
+
+    // Répondre avec un message de succès
+    res.status(200).json({ message: 'Mot de passe mis à jour avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }

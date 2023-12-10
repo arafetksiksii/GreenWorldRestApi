@@ -26,19 +26,19 @@ const userSchema = new Schema(
         cin: {
             type: String
         },
-        
+
         resetCode: {
-            type:  String
+            type: String
         },
         userName: {
             type: String
         },
         numTel: {
             type: String
-        },  score: {
+        }, score: {
             type: Number,
             default: 0,
-          },
+        },
         lastPassword: {
             type: String
         },
@@ -64,15 +64,15 @@ const userSchema = new Schema(
         isBanned: {
             type: Boolean,
             default: false,
-          },
-          banExpirationDate: {
+        },
+        banExpirationDate: {
             type: Date,
             default: null,
-          },
-          isBannedTemp: {
+        },
+        isBannedTemp: {
             type: Boolean,
             default: false,
-          },
+        },
 
     },
     {

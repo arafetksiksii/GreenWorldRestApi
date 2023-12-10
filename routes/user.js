@@ -11,7 +11,8 @@ import {
   updateScoreById,
   resetPassword,
   sendResetCodeByTel,
-  sendResetCode
+  sendResetCode,
+  updatePassword
 
 } from "../controllers/user.js"; // Assurez-vous d'importer les bonnes fonctions du controller
 
@@ -36,10 +37,13 @@ router.get("/:id", getUserById,);
 
 // Route pour mettre à jour un utilisateur par ID
 router.put(
-  "/",
+  "/:id",
   updateUserById,
   
 );
+
+
+
 // Route to update a user's profile by ID
 router.put(
   "/updateProfilById",  // New route path
@@ -56,7 +60,7 @@ router.put(
 
 // Route pour supprimer un utilisateur par ID
 router.delete("/:id", deleteUserById);
-
+router.put('/updatePassword/:id', updatePassword);
 
 
 export default router;
