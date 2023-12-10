@@ -69,6 +69,10 @@ const userSchema = new Schema(
             type: Date,
             default: null,
           },
+          isBannedTemp: {
+            type: Boolean,
+            default: false,
+          },
 
     },
     {

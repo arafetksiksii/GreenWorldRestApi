@@ -94,7 +94,7 @@ export async function banUserWithDuration(req, res) {
       const banExpirationDate = new Date(currentDate.getTime() + banDurationInMinutes * 60000);
   
       // Marquez l'utilisateur comme banni avec la date d'expiration
-      user.isBanned = true;
+      user. isBannedTemp = true;
       user.banExpirationDate = banExpirationDate;
   
       // Sauvegardez les modifications dans la base de données

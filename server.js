@@ -20,6 +20,11 @@ import authController from './controllers/authController.js';
 import  reservationRoutes from './routes/reservation.js';  // Assurez-vous que le chemin est correct
 import   adminRoutes from './routes/adminRoutes.js';
 
+
+import swaggerUi from 'swagger-ui-express';
+import specs from './swagger.js'; // Importez le fichier de configuration Swagger
+
+
 const app = express();
 app.use(bodyParser.json());
 const port = process.env.PORT || 9090;
@@ -47,6 +52,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/img', express.static('public/images'));
 app.use('/auth', authController); // Ajout de la route d'authentification
 app.use('/admin',adminRoutes)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/user', userRoutes);
 app.use('/produit', produitRoutes);
 app.use('/commande', commandeRoutes);
@@ -69,5 +75,5 @@ app.use('/evt', (req, res, next) => {
   next();
 });
 app.listen(port, () => {
-  console.log(`Server running at http:// 192.168.39.138::${port}/`);
+  console.log(`Server running at http:// 192.168.1.16::${port}/`);
 });

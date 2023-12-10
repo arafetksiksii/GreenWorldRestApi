@@ -18,9 +18,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if the user is banned and if banExpirationDate is passed
-    if (user.isBanned && user.banExpirationDate && new Date() > user.banExpirationDate) {
+    if (user. isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
       // If banExpirationDate is passed, unban the user
-      user.isBanned = false;
+      user. isBannedTemp = false;
       user.banExpirationDate = null;
       await user.save();
     }
