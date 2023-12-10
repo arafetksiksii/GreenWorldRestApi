@@ -5,11 +5,7 @@ import bcrypt from 'bcrypt'; // Assuming you are using bcrypt for password hashi
 import User from '../models/user.js'; // Import your user model
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 const router = express.Router();
-// login route
-import { validationResult } from 'express-validator';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
+
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
