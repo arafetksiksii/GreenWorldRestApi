@@ -18,7 +18,7 @@ import CommentRoute from './routes/comment.js';
 import bodyParser from 'body-parser';
 import authController from './controllers/authController.js';
 import  reservationRoutes from './routes/reservation.js';  // Assurez-vous que le chemin est correct
-
+import   adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 app.use(bodyParser.json());
@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/img', express.static('public/images'));
 app.use('/auth', authController); // Ajout de la route d'authentification
-
+app.use('/admin',adminRoutes)
 app.use('/user', userRoutes);
 app.use('/produit', produitRoutes);
 app.use('/commande', commandeRoutes);
@@ -69,5 +69,5 @@ app.use('/evt', (req, res, next) => {
   next();
 });
 app.listen(port, () => {
-  console.log(`Server running at http://192.168.1.16::${port}/`);
+  console.log(`Server running at http:// 192.168.39.138::${port}/`);
 });

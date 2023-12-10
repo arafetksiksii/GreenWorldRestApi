@@ -6,6 +6,11 @@ import User from '../models/user.js'; // Import your user model
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 // login route
+import { validationResult } from 'express-validator';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.js';
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -14,6 +19,19 @@ router.post('/login', async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials email' });
+    }
+
+    // Check if the user is banned and if banExpirationDate is passed
+    if (user.isBanned && user.banExpirationDate && new Date() > user.banExpirationDate) {
+      // If banExpirationDate is passed, unban the user
+      user.isBanned = false;
+      user.banExpirationDate = null;
+      await user.save();
+    }
+
+    // Check if the user is banned after potential unban
+    if (user.isBanned) {
+      return res.status(401).json({ message: 'User is banned' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -29,7 +47,7 @@ router.post('/login', async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(user._id, { token: token }, { new: true });
 
     // Send the token in the response
-    res.json(  updatedUser );
+    res.json(updatedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });

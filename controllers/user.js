@@ -3,7 +3,7 @@ import User from '../models/user.js';
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
-import {uploadImage  } from '../middlewares/mm.js';
+import { uploadImage } from '../middlewares/mm.js';
 import twilio from 'twilio';
 import jwt from 'jsonwebtoken';
 import e from 'cors';
@@ -19,39 +19,40 @@ const accountSid = 'ACe97f325708d9f5079f44ba3cfca97f3d';
 const authToken = '7a3001c6bf1c52995b3d22846d74f02c';
 const client = twilio(accountSid, authToken);
 //recover all users
-export  function getAllUsers(req, res) {
-  
+export function getAllUsers(req, res) {
+
   authenticateUser(req, res, () => {
-  User.find({})
-    .then((users) => {
-      let userList = users.map((user) => {  
-        return {
-          id: user._id,
-          email: user.email,
-          nom: user.nom,
-          prenom: user.prenom,
-          dateNaissance: user.dateNaissance,
-          adress: user.adress,
-          cin: user.cin,
-          userName: user.userName,
-          lastPassword: user.lastPassword,
-          isValid: user.isValid,
-          imageRes: user.imageRes,
-          role: user.role,
-          numTel:user.numTel,
-        };
+    User.find({})
+      .then((users) => {
+        let userList = users.map((user) => {
+          return {
+            id: user._id,
+            email: user.email,
+            nom: user.nom,
+            prenom: user.prenom,
+            dateNaissance: user.dateNaissance,
+            adress: user.adress,
+            cin: user.cin,
+            userName: user.userName,
+            lastPassword: user.lastPassword,
+            isValid: user.isValid,
+            imageRes: user.imageRes,
+            role: user.role,
+            numTel: user.numTel,
+          };
+        });
+        res.status(200).json(userList);
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err });
       });
-      res.status(200).json(userList);
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    }); 
   });
 
 }
 // add user
 
 export async function addUser(req, res) {
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -86,7 +87,7 @@ export async function addUser(req, res) {
     // Handle image upload
     const imageData = req.body.imageRes || 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
     const cloudinaryResponse = await uploadImage(imageData);
-   
+
     // Assuming that the image URL is in the secure_url property of the Cloudinary response
     const imageUrl = cloudinaryResponse.secure_url;
 
@@ -105,7 +106,7 @@ export async function addUser(req, res) {
       numTel,
       imageRes: imageUrl,
       role,
-     
+
     });
 
     // Send welcome email
@@ -174,7 +175,7 @@ export async function updateUserById(req, res) {
 
     // ...
 
-    const updatedUser = await User.findByIdAndUpdate(req.body.id, updatedUserData, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(req.body.email, updatedUserData, { new: true });
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -189,17 +190,17 @@ export async function updateUserById(req, res) {
 
 export function deleteUserById(req, res) {
   authorizeAdmin(req, res, () => {
-  User.findOneAndDelete({ _id: req.params.id })
-    .then((user) => {
-      if (!user) {
-        res.status(404).json({ message: 'Utilisateur introuvable' });
-      } else {
-        res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err });
-    });
+    User.findOneAndDelete({ _id: req.params.id })
+      .then((user) => {
+        if (!user) {
+          res.status(404).json({ message: 'Utilisateur introuvable' });
+        } else {
+          res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err });
+      });
   });
 }
 // Import necessary modules and middleware
@@ -208,14 +209,14 @@ export function deleteUserById(req, res) {
 
 
 export function updateScoreById(req, res) {
- 
+
 
 
   // Check if the request body contains the "score" attribute
   if (!req.body.score) {
     console.log(req.body.score)
     return res.status(400).json({ message: 'Bad Request - Score is required' });
-   
+
   }
 
   if (!req.body.id) {
@@ -277,7 +278,7 @@ export async function resetPassword(req, res, next) {
     // Handle other types of errors as needed
     res.status(500).json({ error: 'Internal Server Error' });
   }
-  
+
 }
 // Export the sendResetCodeByTel function
 export async function sendResetCodeByTel(req, res) {
@@ -328,6 +329,7 @@ function generateResetCode() {
 
 export async function sendResetCode(req, res) {
   const errors = validationResult(req);
+  console.log(req.body)
 
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
