@@ -109,3 +109,62 @@ export async function banUserWithDuration(req, res) {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+
+
+  export async function verifyResetCode(req, res) {
+   
+    const errors = validationResult(req);
+  
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+  
+    const { email, resetCode } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      if (user.resetCode !== resetCode) {
+        return res.status(400).json({ message: 'Invalid reset code' });
+      }
+  
+     
+      res.json(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+
+export async function newPassword(req, res) {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update the user's password (replace this with your actual logic)
+    user.password = await bcrypt.hash(newPassword, 10);
+  
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}

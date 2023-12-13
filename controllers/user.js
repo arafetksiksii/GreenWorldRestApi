@@ -376,10 +376,12 @@ export async function sendResetCode(req, res) {
 
 
 export async function updatePassword(req, res) {
+
+ 
   try {
     // Extraire les champs du corps de la requête
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
-
+    console.log(req.body)
     // Vérifier que tous les champs requis sont présents
     if (!req.params.id || !currentPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ message: 'Veuillez fournir tous les champs requis' });

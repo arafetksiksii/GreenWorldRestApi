@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { banUser, unbanUser, banUserWithDuration } from '../controllers/adminController.js';
+import { banUser, unbanUser, banUserWithDuration,verifyResetCode,newPassword } from '../controllers/adminController.js';
 import { body } from 'express-validator';
 
 const router = express.Router();
@@ -45,6 +45,8 @@ router.put(
   banUser
 );
 
+router.put('/newPassword',newPassword)
+router.post('/verifyResetCode',verifyResetCode)
 /**
  * @swagger
  * /admin/{id}/unban:

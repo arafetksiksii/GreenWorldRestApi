@@ -72,8 +72,9 @@ app.use(errorHandler);
 // Sur toute demande à /gse, exécutez ce qui suit
 app.use('/evt', (req, res, next) => {
   console.log("Middleware just ran on a gse route !");
-  next();
+  next();  
 });
 app.listen(port, () => {
-  console.log(`Server running at http:// 192.168.1.16::${port}/`);
-});
+  console.log(`Server running at http://192.168.1:16::${port}/`);
+});  
+  

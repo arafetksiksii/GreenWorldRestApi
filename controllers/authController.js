@@ -7,6 +7,11 @@ import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.
 const router = express.Router();
 
 
+   
+
+
+
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -135,5 +140,8 @@ router.get('/loggeduser', authenticateUser, async (req, res) => {
   }
 });
   
+
+
+
 
 export default router;

@@ -15,7 +15,7 @@ import {
 } from '../controllers/event.js';
 import multer from '../middlewares/multer-config.js';
 
-const router = express.Router();
+const router = express.Router(); 
 
 router.route('/')
   .get(getAll)
