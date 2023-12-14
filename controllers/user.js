@@ -154,18 +154,19 @@ export function getUserById(req, res) {
 }
 
 export async function updateUserById(req, res) {
+
+  console.log('eeeeeeeeeeeeeeeeeeeee')
+  console.log(req.body)
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
 
-  console.log(req.body);
-
   try {
-    // Construire dynamiquement l'objet updatedUserData en filtrant les valeurs non nulles
+
     const updatedUserData = {};
     Object.keys(req.body).forEach((key) => {
-      // Vérifier si le champ n'est pas le mot de passe
-      if (key !== 'password' && req.body[key] !== null && req.body[key] !== undefined) {
+      // Check for non-null, non-undefined, and non-empty string values
+      if (key !== 'password' && req.body[key] != null && req.body[key] !== '') {
         updatedUserData[key] = req.body[key];
       }
     });
@@ -182,7 +183,6 @@ export async function updateUserById(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
 
 
 export function deleteUserById(req, res) {
@@ -255,7 +255,7 @@ export async function resetPassword(req, res, next) {
       req.user.id,
       { password: hash },
       { new: true }
-    );
+    );  
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -377,7 +377,7 @@ export async function sendResetCode(req, res) {
 
 export async function updatePassword(req, res) {
 
- 
+
   try {
     // Extraire les champs du corps de la requête
     const { currentPassword, newPassword, confirmNewPassword } = req.body;

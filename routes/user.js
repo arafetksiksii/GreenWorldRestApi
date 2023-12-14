@@ -24,14 +24,14 @@ router.get("/", getAllUsers);
 // Route pour créer un nouvel utilisateur
 router.post(
   "/",
-  
+
   body('email').isEmail(),
   body('password').isLength({ min: 6 }),
   addUser
 );
 
-router.post("/sendResetCode",  sendResetCode);
-router.post("/reset", sendResetCodeByTel,body('numeTel').isNumeric);
+router.post("/sendResetCode", sendResetCode);
+router.post("/reset", sendResetCodeByTel, body('numeTel').isNumeric);
 // Route pour obtenir les détails d'un utilisateur par ID
 router.get("/:id", getUserById,);
 
@@ -39,7 +39,7 @@ router.get("/:id", getUserById,);
 router.put(
   "/:id",
   updateUserById,
-  
+
 );
 
 
@@ -47,19 +47,19 @@ router.put(
 // Route to update a user's profile by ID
 router.put(
   "/updateProfilById",  // New route path
- 
+
   updateScoreById
 );
 
 // Route to update a user's profile by ID
 router.put(
   "/update",  // New route path
- 
+
   resetPassword
 );
 
 // Route pour supprimer un utilisateur par ID
-router.delete("/:id", deleteUserById);
+router.delete("/:id", deleteUserById);  
 router.put('/updatePassword/:id', updatePassword);
 
 

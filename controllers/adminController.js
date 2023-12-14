@@ -111,6 +111,19 @@ export async function banUserWithDuration(req, res) {
   }
 
 
+  export async function getBannedUsers(req, res) {
+    console.log("getBannedUsers")
+    try {
+      // Find all users that are currently banned
+      const bannedUsers = await User.find({ isBanned: true });
+  
+      res.status(200).json(bannedUsers);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
   export async function verifyResetCode(req, res) {
    
     const errors = validationResult(req);
