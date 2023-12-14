@@ -125,7 +125,8 @@ export async function banUserWithDuration(req, res) {
   }
 
   export async function verifyResetCode(req, res) {
-   
+   console.log(req.body)
+   console.log("eeeeeeeeeeeeee")
     const errors = validationResult(req);
   
     if (!errors.isEmpty()) {
@@ -163,7 +164,7 @@ export async function newPassword(req, res) {
 
   const { email, newPassword } = req.body;
 
-  try {
+  try {  
     const user = await User.findOne({ email });
 
     if (!user) {
