@@ -156,6 +156,8 @@ export async function banUserWithDuration(req, res) {
 
 
 export async function newPassword(req, res) {
+
+  console.log(req.body)
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -181,4 +183,4 @@ export async function newPassword(req, res) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-}
+}  

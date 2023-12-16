@@ -75,6 +75,6 @@ app.use('/evt', (req, res, next) => {
   next();  
 });
 app.listen(port, () => {
-  console.log(`Server running at http://192.168.167.138::${port}/`);
+  console.log(`Server running at http://192.168.0.143::${port}/`);
 });  
   

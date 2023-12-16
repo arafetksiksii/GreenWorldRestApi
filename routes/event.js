@@ -15,7 +15,7 @@ import {
 } from '../controllers/event.js';
 import multer from '../middlewares/multer-config.js';
 
-const router = express.Router(); 
+const router = express.Router();
 
 router.route('/')
   .get(getAll)
@@ -44,7 +44,7 @@ router.get('/getEventByname', getEventByname);
 router.get('/trierEvent', trierparDate);
 router.get('/:eventID', getEventByID);
 
-router.route('/:titre')
+router.route('/:id')
   .put(putOnce)
   .patch(patchOnce)
   .delete(deleteOnce);

@@ -3,6 +3,7 @@ import Event from '../models/event.js'
 export function getAll(req, res) {
     Event
     .find({})
+    .populate('comments')  // Indique à Mongoose de remplir le champ 'comments'
     .then(docs => {
         res.status(200).json(docs);
     })
@@ -28,7 +29,7 @@ export function addOnce(req, res) {
           nbparticipant: req.body.nbparticipant,
           nbPlace: req.body.nbPlace,
           // Récupérer l'URL de l'image pour l'insérer dans la BD
-          image: `http://10.0.2.2:9090/img/${req.file.filename}`,
+          image: req.file.filename,
           longitude: req.body.longitude,
           latitude: req.body.latitude
 
@@ -38,8 +39,8 @@ export function addOnce(req, res) {
       })
       .catch(err => {
           res.status(500).json({ error: err });
-      });
-    }
+      });
+    }
 }
 
 export function putOnce(req, res) {
@@ -81,19 +82,21 @@ export function patchOnce(req, res) {
  * Supprimer un seul document
  */
 export function deleteOnce(req, res) {
-    Event
-      .findOneAndDelete({ "titre": req.params.titre })
-      .then(doc => {
-        if (doc) {
-          res.status(200).json(doc);
-        } else {
-          res.status(404).json({ message: "Document not found" });
-        }
-      })
-      .catch(err => {
-        res.status(500).json({ error: err });
-      });
-  }
+  const { id } = req.params;
+
+  Event.findOneAndDelete({ _id: id })
+    .then((doc) => {
+      if (doc) {
+        res.status(200).json({ message: "Document deleted successfully", deletedDoc: doc });
+      } else {
+        res.status(404).json({ message: "Document not found" });
+      }
+    })
+    .catch((err) => {
+      console.error("Error deleting document:", err);
+      res.status(500).json({ error: "Internal server error" });
+    });
+}
   //update un evennement:
   export async function modifierEvenement(eventId, newDetails,req) {
     try {
@@ -198,5 +201,3 @@ export function getRandomEvent(req, res) {
         res.status(500).json({ error: err });
       });
   }
-
-    

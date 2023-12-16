@@ -116,7 +116,62 @@ export async function addUser(req, res) {
       subject: 'Welcome to your application',
       text: 'Thank you for registering on our application. Welcome!',
       html: `
-      <!-- Your HTML email content -->
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f4f4f4;
+                  margin: 0;
+                  padding: 0;
+              }
+              .container {
+                  background-color: #ffffff;
+                  width: 100%;
+                  max-width: 600px;
+                  margin: auto;
+                  padding: 20px;
+              }
+              .header {
+                  background-color: #4CAF50;
+                  color: white;
+                  text-align: center;
+                  padding: 10px;
+              }
+              .content {
+                  padding: 20px;
+                  text-align: center;
+              }
+              .footer {
+                  text-align: center;
+                  padding: 10px;
+                  font-size: 0.8em;
+                  color: #666;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>Welcome to Green World!</h1>
+              </div>
+              <div class="content">
+                  <h2>Hello ${userName},</h2>
+                  <p>Thank you for joining Green World! We are thrilled to have you on board and are excited to help you get started on your journey towards a greener lifestyle.</p>
+                  <p>You are now part of a community that values sustainability, environmental consciousness, and a healthier planet. Stay tuned for updates, tips, and exciting opportunities!</p>
+                  <p>If you have any questions or need assistance, feel free to reach out to us.</p>
+                  <p>Welcome aboard!</p>
+                  <p>Best regards,</p>
+                  <p>The Green World Team</p>
+              </div>
+              <div class="footer">
+                  &copy; 2023 Green World. All rights reserved.
+              </div>
+          </div>
+      </body>
+      </html>
+      
     `,
     };
 
@@ -347,8 +402,65 @@ export async function sendResetCode(req, res) {
       from: 'your-email@gmail.com',
       to: email,
       subject: 'Password Reset Code',
-      text: `Your password reset code is: ${resetCode}`,
-    };
+      html: `
+     
+      <html>
+      <head>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f4f4f4;
+                  margin: 0;
+                  padding: 0;
+              }
+              .container {
+                  background-color: #ffffff;
+                  width: 100%;
+                  max-width: 600px;
+                  margin: auto;
+                  padding: 20px;
+              }
+              .header {
+                  background-color: #32a852;
+                  color: white;
+                  text-align: center;
+                  padding: 10px;
+              }
+              .content {
+                  padding: 20px;
+                  text-align: center;
+              }
+              .footer {
+                  text-align: center;
+                  padding: 10px;
+                  font-size: 0.8em;
+                  color: #666;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>Green World</h1>
+              </div>
+              <div class="content">
+                  <h2>Password Reset Request</h2>
+                  <p>You have requested to reset your password for your Green World account.</p>
+                  <p>Your Password Reset Code is:</p>
+                  <div style="background-color: #e8f5e9; padding: 15px; margin: 20px 0; font-size: 1.5em;">
+                      ${resetCode}
+                  </div>
+                  <p>Enter this code in the provided field to reset your password.</p>
+              </div>
+              <div class="footer">
+                  &copy; 2023 Green World. All rights reserved.
+              </div>
+          </div>
+      </body>
+      </html>
+      
+      `
+  };
 
     transporter.sendMail(mailOptions, (emailError, info) => {
       if (emailError) {

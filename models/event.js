@@ -2,21 +2,23 @@ import mongoose from 'mongoose';
 const  { Schema,model } =mongoose;
 const eventSchema = new Schema(
     {
+
         titre: {
             type: String,
             required: true
         },
         dateDebut: {
             type: String,
-            required: true
+            required: false
         },
         dateFin: {
             type: String,
-            required: true
+            required: false
+            
         },
         lieu: {
             type: String,
-            required: true
+            required: false
         },
         description: {
             type: String,
@@ -24,15 +26,15 @@ const eventSchema = new Schema(
         },
         nbparticipant: {
             type: Number,
-            required: true
+            required: false
         },
         nbPlace: {
             type: Number,
-            required: true
+            required: false
         },
         image: {
             type: String ,
-            required: true
+            required: false
         },
         latitude: {
             type: Number,
@@ -41,7 +43,13 @@ const eventSchema = new Schema(
         longitude: {
             type: Number,
             required: false
-        }
+        },
+        comments: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+          }]
+
+      
     },
         {
             timesStamps: true //date automatique

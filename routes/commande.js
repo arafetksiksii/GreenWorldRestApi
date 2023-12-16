@@ -1,8 +1,8 @@
 import express from "express";
-import jwt from 'jsonwebtoken';
 import Commande from "../models/commande.js";
 import Produit from"../models/produit.js";
 import stripe from "stripe";
+import bodyParser from "body-parser";
 import nodemailer from 'nodemailer';
 import { deleteCommandeById } from '../controllers/commande.js';
 import { authenticateUser } from "../middlewares/authMiddleware.js";
@@ -23,9 +23,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 const router = express.Router();
+router.use(bodyParser.json()); //
 const stripeSecretKey = 'sk_test_51ODOR4KuYIHrh7zw51qwhgS8oDwJcwWbq4Sqe1BA7oFNhf51Es6AuXUPO3VZLDvl2PYzkGQfybGWWjfGKwn6VdxP00A27LizGQ';
 const stripeClient = stripe(stripeSecretKey);
-
+if (!stripeClient) {
+  console.error('Error initializing Stripe client');
+}
 // Create a new "commande"
 // Create a new "commande"
 router.post('/', async (req, res) => {
@@ -34,9 +37,7 @@ router.post('/', async (req, res) => {
     const { selectedProducts } = req.body;
 
     // Calculate the total price based on the products in selectedProducts
-    const totalPrice = selectedProducts.reduce((acc, product) => {
-      return acc + product.price * product.quantity;
-    }, 0);
+    const totalPrice = 10;
 
     const newCommande = new Commande({ selectedProducts, totalPrice, userId });
     const savedCommande = await newCommande.save();
@@ -51,11 +52,9 @@ router.post('/', async (req, res) => {
 
 // Add products to a "commande"
 // Add products to a "commande"
-router.post('/add-products', async (req, res) => {
+router.post('/add-products', authenticateUser, async (req, res) => {
   try {
-
-    const userId = "655f7a41e7c5d11f0bd76ea0";
-
+    const userId = req.user.id;
     const produitId = req.query.produitId;
 
     // Fetch the existing commande for the user
@@ -233,6 +232,51 @@ function formatCartDetails(selectedProducts) {
     return `${product.title}: ${product.quantity} x ${product.price} TND`;
   }).join('\n');
 }
+
+router.post('/create-payment-intent2', async (req, res) => {
+  try {
+    const { amount, userEmail } = req.body;
+
+    console.log('Received amount:', amount); // Log the amount
+
+    if (!amount || isNaN(amount)) {
+      return res.status(400).json({ error: 'Invalid or missing amount' });
+    }
+
+    // Create a PaymentIntent
+    const paymentIntent = await stripeClient.paymentIntents.create({
+      amount: amount * 100, // Use the amount directly without rounding
+      currency: 'usd',
+      payment_method_types: ['card'],
+    });
+
+    if (!paymentIntent || !paymentIntent.client_secret) {
+      throw new Error('Invalid PaymentIntent response');
+    }
+
+    // Send email with payment details
+    const mailOptions = {
+      from: 'arafetksiksi7@gmail.com', // replace with your email
+      to: 'arafet.ksiksi@esprit.tn', // replace with the user's email
+      subject: 'Payment Receipt',
+      text: `Thank you for your payment!\n\nPayment Details:\n\nAmount: ${amount} USD`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('Error creating PaymentIntent:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 
