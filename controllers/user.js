@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'aymen.zouaoui@esprit.tn',
-    pass: '223AMT0874',
+    pass: '223AMT0874a',
   },
 });
 
@@ -39,6 +39,7 @@ export function getAllUsers(req, res) {
             imageRes: user.imageRes,
             role: user.role,
             numTel: user.numTel,
+            isBanned:user.isBanned,
           };
         });
         res.status(200).json(userList);

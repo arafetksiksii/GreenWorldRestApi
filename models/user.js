@@ -1,3 +1,5 @@
+//user.js
+
 import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
@@ -73,8 +75,15 @@ const userSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        lastLoginTimestamp: Date,
+        lastLogoutTimestamp: Date,
+        lastActive: Date,
+        totalTimeSpent: {
+            type: Number,
+            default: 0, // Temps en millisecondes ou en secondes
+        },
 
-
+  
     },
     {
         timestamps: true
