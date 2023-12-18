@@ -39,7 +39,7 @@ export function getAllUsers(req, res) {
             imageRes: user.imageRes,
             role: user.role,
             numTel: user.numTel,
-            isBanned:user.isBanned,
+            isBanned: user.isBanned,
           };
         });
         res.status(200).json(userList);
@@ -84,9 +84,11 @@ export async function addUser(req, res) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    console.log("zzzzzzzzzzz")
+    console.log(req.body)
     // Handle image upload
-    const imageData = req.body.imageRes || 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
+    const imageData = req.file ? req.file.path : 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
+    //const imageData = req.file.path || 'https://th.bing.com/th/id/OIP.iAhcp6m_91O-ClK79h8EQQHaFj?w=221&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7';
     const cloudinaryResponse = await uploadImage(imageData);
 
     // Assuming that the image URL is in the secure_url property of the Cloudinary response
@@ -311,7 +313,7 @@ export async function resetPassword(req, res, next) {
       req.user.id,
       { password: hash },
       { new: true }
-    );  
+    );
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -461,7 +463,7 @@ export async function sendResetCode(req, res) {
       </html>
       
       `
-  };
+    };
 
     transporter.sendMail(mailOptions, (emailError, info) => {
       if (emailError) {
