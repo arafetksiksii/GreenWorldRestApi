@@ -1,16 +1,10 @@
 
-import express from 'express';
+/*import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'; // Assuming you are using bcrypt for password hashing
 import User from '../models/user.js'; // Import your user model
 import { authenticateUser, authorizeAdmin } from '../middlewares/authMiddleware.js';
 const router = express.Router();
-import LoginEvent from '../models/loginEvent.js';
-
-   
-
-
-
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -23,9 +17,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if the user is banned and if banExpirationDate is passed
-    if (user. isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
+    if (user.isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
       // If banExpirationDate is passed, unban the user
-      user. isBannedTemp = false;
+      user.isBannedTemp = false;
       user.banExpirationDate = null;
       await user.save();
     }
@@ -45,19 +39,12 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
 
     // Update user with JWT token
-    const updatedUser = await User.findByIdAndUpdate(user._id, { 
-      token: token, 
-      lastLoginTimestamp: new Date(),
-      lastLogoutTimestamp: null
+    const updatedUser = await User.findByIdAndUpdate(user._id, {
+      token: token,
+    
     });
 
-     // Log the login event in a separate collection
-     const loginEvent = new LoginEvent({
-      userId: user._id,
-      timestamp: new Date(),
-    });
-    await loginEvent.save();
-    // Send the token in the response
+  
     res.json(updatedUser);
   } catch (error) {
     console.error(error);
@@ -77,10 +64,9 @@ router.post('/logout', authenticateUser, async (req, res) => {
       const lastLogoutTimestamp = new Date();
       const timeSpent = lastLogoutTimestamp - user.lastLoginTimestamp;
 
-      await User.findByIdAndUpdate(userID, { 
+      await User.findByIdAndUpdate(userID, {
         token: null,
-        lastLogoutTimestamp: lastLogoutTimestamp,
-        $inc: { totalTimeSpent: timeSpent }
+    
       });
 
       res.json({ message: 'Logout successful' });
@@ -107,18 +93,17 @@ router.post('/loginiios', async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials password' });
-    } 
+    }
 
     // Generate JWT token
     const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
 
     // Update user with JWT token
-    await User.findByIdAndUpdate(user._id, { 
-      token: token, 
-      lastLoginTimestamp: new Date(),
-      lastLogoutTimestamp: null
+    await User.findByIdAndUpdate(user._id, {
+      token: token,
+    
     });
-   
+
     // Send the token in the response along with user details
     res.json({
       user: {
@@ -151,123 +136,254 @@ router.get('/loggeduser', authenticateUser, async (req, res) => {
       email: user.email,
       nom: user.nom,
       prenom: user.prenom,
-      imageRes:user.imageRes,
-      userName:user.userName
+      imageRes: user.imageRes,
+      userName: user.userName
       // Add other necessary fields
     };
 
-    res.json( userData );
+    res.json(userData);
   } catch (error) {
     console.error('Error fetching logged-in user:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
   }
 });
-  
 
 
-router.get('/login-stats', async (req, res) => {
-  try {
-    const loginStats = await User.aggregate([
-      {
-        $match: { lastLoginTimestamp: { $exists: true } }
-      },
-      {
-        $group: {
-          _id: {
-            userId: "$_id",
-            year: { $year: "$lastLoginTimestamp" },
-            month: { $month: "$lastLoginTimestamp" },
-            day: { $dayOfMonth: "$lastLoginTimestamp" },
-          },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 }
-      }
-    ]);
 
-    res.json(loginStats);
-  } catch (error) {
-    console.error('Error fetching login statistics:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
-
-
-// Assuming this is in your router file (e.g., authRoutes.js)
-
-router.get('/login-statss', async (req, res) => {
-  try {
-    const loginStats = await LoginEvent.aggregate([
-      {
-        $group: {
-          _id: {
-            userId: "$userId",
-            year: { $year: "$timestamp" },
-            month: { $month: "$timestamp" },
-            day: { $dayOfMonth: "$timestamp" },
-          },
-          count: { $sum: 1 },
-        }
-      },
-      {
-        $group: {
-          _id: "$_id.userId",
-          loginStats: { $push: { date: "$_id", count: "$count" } },
-        }
-      }
-    ]);
-
-    res.json(loginStats);
-  } catch (error) {
-    console.error('Error fetching login statistics:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
-router.get('/user-stats', async (req, res) => {
-  try {
-    const userStats = await User.aggregate([
-      {
-        $lookup: {
-          from: 'loginevents', // Use the actual name of your LoginEvent collection
-          localField: '_id',
-          foreignField: 'userId',
-          as: 'loginEvents',
-        },
-      },
-      {
-        $unwind: { path: '$loginEvents', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $group: {
-          _id: {
-            userId: '$_id',
-            year: { $year: '$loginEvents.timestamp' },
-            month: { $month: '$loginEvents.timestamp' },
-            day: { $dayOfMonth: '$loginEvents.timestamp' },
-          },
-          count: { $sum: 1 },
-          totalTimeSpent: { $sum: { $subtract: ['$lastLogoutTimestamp', '$loginEvents.timestamp'] } },
-        },
-      },
-      {
-        $group: {
-          _id: '$_id.userId',
-          loginStats: { $push: { date: '$_id', count: '$count' } },
-          totalLogins: { $sum: '$count' },
-          totalTimeSpent: { $sum: '$totalTimeSpent' },
-        },
-      },
-    ]);
-
-    res.json(userStats);
-  } catch (error) {
-    console.error('Error fetching user statistics:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 export default router;
 
 
+*/import express from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import User from '../models/user.js';
+import DailyStats from '../models/DailyStats.js'; // Import the DailyStats model
+import { authenticateUser } from '../middlewares/authMiddleware.js';
+
+const router = express.Router();
+
+// Login route
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials email' });
+    }
+
+    // Check if the user is banned and if banExpirationDate is passed
+    if (user.isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
+      // If banExpirationDate is passed, unban the user
+      user.isBannedTemp = false;
+      user.banExpirationDate = null;
+      await user.save();
+    }
+
+    // Check if the user is banned after potential unban
+    if (user.isBanned) {
+      return res.status(401).json({ message: 'User is banned' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid credentials password' });
+    }
+
+    // Record login information in DailyStats collection
+    const loginDate = new Date();
+    await DailyStats.findOneAndUpdate(
+      {
+        userId: user._id,
+        date: {
+          $gte: new Date(loginDate.getFullYear(), loginDate.getMonth(), loginDate.getDate()),
+          $lt: new Date(loginDate.getFullYear(), loginDate.getMonth(), loginDate.getDate() + 1),
+        },
+      },
+      {
+        $inc: { loginCount: 1 },
+        $set: { date: loginDate },
+      },
+      { upsert: true }
+    );
+
+    // Increment loginCount for the updatedUser
+    user.loginCount += 1;
+
+    // Generate JWT token
+    const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
+
+    // Update user with JWT token and incremented loginCount
+    const updatedUser = await User.findByIdAndUpdate(user._id, { token: token, loginCount: user.loginCount });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// Logout route
+router.post('/logout', authenticateUser, async (req, res) => {
+  try {
+    const userID = req.user.id;
+    const user = await User.findById(userID);
+
+    if (user && user.lastLoginTimestamp) {
+      // Calculate the time spent during this session
+      const lastLogoutTimestamp = new Date();
+      const timeSpent = lastLogoutTimestamp - user.lastLoginTimestamp;
+
+      // Record the time spent and logout timestamp in DailyStats collection
+      const logoutDate = new Date();
+      await DailyStats.findOneAndUpdate(
+        {
+          userId: user._id,
+          date: {
+            $gte: new Date(logoutDate.getFullYear(), logoutDate.getMonth(), logoutDate.getDate()),
+            $lt: new Date(logoutDate.getFullYear(), logoutDate.getMonth(), logoutDate.getDate() + 1),
+          },
+        },
+        {
+          $inc: { timeSpent: timeSpent },
+          $set: { date: logoutDate },
+        },
+        { upsert: true }
+      );
+
+      // Increment totalTimeSpent for the user
+      user.totalTimeSpent += timeSpent;
+
+      // Clear the user's token (log them out)
+      await User.findByIdAndUpdate(userID, { token: null, totalTimeSpent: user.totalTimeSpent });
+
+      res.json({ message: 'Logout successful' });
+    } else {
+      res.status(400).json({ message: 'User not logged in or login timestamp missing' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// Get logged-in user route
+router.get('/loggeduser', authenticateUser, async (req, res) => {
+  try {
+    const userID = req.user.id;
+    const user = await User.findById(userID);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Send only necessary user data, not the entire user object
+    const userData = {
+      id: user._id,
+      email: user.email,
+      nom: user.nom,
+      prenom: user.prenom,
+      imageRes: user.imageRes,
+      userName: user.userName,
+      // Add other necessary fields
+    };
+
+    res.json(userData);
+  } catch (error) {
+    console.error('Error fetching logged-in user:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+
+async function getUserDailyStats(userId, date) {
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+
+  const userStats = await DailyStats.findOne({
+    userId: userId,
+    date: { $gte: startOfDay, $lt: endOfDay },
+  });
+
+  return userStats || { loginCount: 0, timeSpent: 0 };
+}
+
+async function getUserGlobalStatsuser(userId) {
+  try {
+    // Find the user by userId
+    const user = await User.findById(userId);
+
+    if (!user) {
+      // Handle the case where the user is not found
+      return { loginCount: 0, totalTimeSpent: 0 };
+    }
+
+    // Extract totalLoginCount and totalTimeSpent from the user model
+    const { loginCount, totalTimeSpent } = user;
+
+    // Create an object to hold the global stats
+    const globalStats = {
+      totalLoginCount: loginCount || 0, // Use 0 as the default value if undefined
+      totalTimeSpent: totalTimeSpent || 0, // Use 0 as the default value if undefined
+    };
+
+    return globalStats;
+  } catch (error) {
+    console.error('Error fetching user global stats:', error);
+    return { totalLoginCount: 0, totalTimeSpent: 0 };
+  }
+}
+
+
+
+
+async function getAllUsersGlobalStats() {
+  const globalStats = await DailyStats.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalLoginCount: { $sum: '$loginCount' },
+        totalTimeSpent: { $sum: '$timeSpent' },
+      },
+    },
+  ]);
+
+  if (globalStats.length > 0) {
+    return globalStats[0];
+  } else {
+    return { totalLoginCount: 0, totalTimeSpent: 0 };
+  }
+}
+// Route to get daily and global stats for the logged-in user
+router.get('/userstats/:id', async (req, res) => {
+  try {
+    const userId = req.params.id; // Retrieve the id from route parameters
+    const date = new Date(); // You can replace this with a specific date if needed
+
+    const dailyStats = await getUserDailyStats(userId, date);
+    const globalStats = await getUserGlobalStatsuser(userId);
+
+    res.json({ dailyStats, globalStats });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+// Route to get global stats for all users
+router.get('/allusersstats', async (req, res) => {
+  try {
+    const globalStats = await getAllUsersGlobalStats();
+
+    res.json({ globalStats });
+  } catch (error) {
+    console.error('Error fetching all users stats:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+export default router;
 

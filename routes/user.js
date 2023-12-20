@@ -5,15 +5,15 @@ import multer from "../middlewares/multer-config.js";
 import {
   getAllUsers,
   addUser,
+  sendResetCode,
+  sendResetCodeByTel,
   getUserById,
   updateUserById,
-  deleteUserById,
   updateScoreById,
+  deleteUserById,
   resetPassword,
-  sendResetCodeByTel,
-  sendResetCode,
   updatePassword
-} from "../controllers/user.js"; 
+} from "../controllers/user.js";
 
 const router = express.Router();
 
@@ -35,9 +35,10 @@ router.post("/reset", sendResetCodeByTel, body('numeTel').isNumeric);
 // Route pour obtenir les détails d'un utilisateur par ID
 router.get("/:id", getUserById);
 
-// Route pour mettre à jour un utilisateur par ID
 router.put(
-  "/:id",
+  '/updateUser/:id',
+ 
+
   updateUserById
 );
 
@@ -49,12 +50,12 @@ router.put(
 
 // Route to update a user's profile by ID
 router.put(
-  "/update",  // New route path
+  "/updateR",  // New route path
   resetPassword
 );
 
 // Route pour supprimer un utilisateur par ID
-router.delete("/:id", deleteUserById);  
+router.delete("/:id", deleteUserById);
 router.put('/updatePassword/:id', updatePassword);
 
 export default router;

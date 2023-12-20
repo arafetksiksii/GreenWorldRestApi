@@ -27,7 +27,7 @@ import specs from './swagger.js'; // Importez le fichier de configuration Swagge
 
 const app = express();
 app.use(bodyParser.json());
-const port = process.env.PORT || 9091;
+const port = process.env.PORT || 9090;
 const databaseName = 'GreenWorld';
 const db_url = process.env.DB_URL || `mongodb://127.0.0.1:27017`;
 
