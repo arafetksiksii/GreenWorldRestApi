@@ -7,9 +7,67 @@ import { uploadImage } from '../middlewares/mm.js';
 import twilio from 'twilio';
 import jwt from 'jsonwebtoken';
 import e from 'cors';
+import openai from 'openai';
+// Make sure you have configured your openai API key
+const openaiApiKey = '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';
+openai.apiKey = openaiApiKey;
+console.log(openai.apiKey); 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'aymen.zouaoui@esprit.tn',
+    pass: '223AMT0874a',
+  },
+});
+export async function newPassword(req, res) {
+  const errors = validationResult(req);
 
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
+  const { email, newPassword } = req.body;
 
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update the user's password
+    user.password = await bcrypt.hash(newPassword, 10);
+
+    await user.save();
+
+    // Send a thank-you email using ChatGPT
+    const thankYouEmailPrompt = `Dear ${user.username},\n\nWe would like to thank you for updating your password. If you have any questions or concerns, please feel free to contact us.`;
+
+    console.log(openai); // Check the value of openai
+
+    const response = await openai.Completion.create({
+      engine: 'text-davinci-003',
+      prompt: thankYouEmailPrompt,
+      max_tokens: 200,
+    });
+
+    const thankYouEmailContent = response.choices[0].text;
+
+    const mailOptions = {
+      from: 'your-email@example.com',
+      to: user.email,
+      subject: 'Thank You for Updating Your Password',
+      text: thankYouEmailContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ message: 'Password updated successfully. Thank you email sent.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
 export async function banUser(req, res) {
     const userId = req.params.id; // ou tout autre moyen d'obtenir l'ID de l'utilisateur à bannir
   
@@ -155,32 +213,4 @@ export async function banUserWithDuration(req, res) {
   }
 
 
-export async function newPassword(req, res) {
 
-  console.log(req.body)
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { email, newPassword } = req.body;
-
-  try {  
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Update the user's password (replace this with your actual logic)
-    user.password = await bcrypt.hash(newPassword, 10);
-  
-    await user.save();
-
-    res.json({ message: 'Password updated successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-}  
