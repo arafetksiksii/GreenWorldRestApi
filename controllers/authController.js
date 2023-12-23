@@ -353,7 +353,6 @@ router.post('/loginiios', async (req, res) => {
         email: user.email,
         nom: user.nom,
         prenom: user.prenom,
-        token: token,
         // Include other user details as needed
       },
       token: token,
@@ -461,6 +460,57 @@ router.get('/allusersstats', async (req, res) => {
   } catch (error) {
     console.error('Error fetching all users stats:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
+
+router.post('/loginfb', async (req, res) => {
+  const { email, tokenfb, nom, prenom } = req.body;
+
+  try {
+    // Validate and sanitize user inputs
+    // (e.g., using a library like validator or a custom function)
+
+    // Check if user with the given email and matching tokenfb exists
+    let existingUser = await User.findOne({ email, tokenfb });
+
+    // If the user doesn't exist, create a new user
+    if (!existingUser) {
+      // Create a new user
+      const newUser = new User({
+        email,
+        tokenfb,
+        nom,
+        prenom,
+        password: tokenfb
+        // Other user properties
+      } );
+      console.log("User facebook Created")
+
+      await newUser.save();
+      existingUser = newUser; // Set existingUser to the new user
+    }
+
+    // Return user details with the existing user's tokenfb
+    return res.status(200).json({
+      user: {
+        _id: existingUser._id,
+        email: existingUser.email,
+        nom: existingUser.nom,
+        prenom: existingUser.prenom,
+        tokenfb: existingUser.tokenfb, // Set tokenfb to existingUser's tokenfb
+        // Include other user details as needed
+      },
+      message: 'User found and logged in successfully.',
+    });
+  } catch (error) {
+    console.error('Error in loginfb:', error);
+
+    // Log detailed error information in your development environment
+    // logger.error('Error in loginfb:', error);
+
+    // Return an appropriate status code for the error
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 export default router;

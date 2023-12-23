@@ -32,6 +32,9 @@ const userSchema = new Schema(
     userName: {
       type: String,
     },
+    tokenfb: {
+      type: String,
+    },
     numTel: {
       type: String,
     },
