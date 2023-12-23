@@ -20,40 +20,60 @@ const authToken = '7a3001c6bf1c52995b3d22846d74f02c';
 const client = twilio(accountSid, authToken);
 //recover all users
 export function getAllUsers(req, res) {
+  //authenticateUser(req, res, () => {
+    // Set default values for page and pageSize, and calculate skip value
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const skip = (page - 1) * pageSize;
 
-  authenticateUser(req, res, () => {
-    User.find({})
-      .then((users) => {
-        let userList = users.map((user) => {
-          return {
-            id: user._id,
-            email: user.email,
-            nom: user.nom,
-            prenom: user.prenom,
-            dateNaissance: user.dateNaissance,
-            adress: user.adress,
-            cin: user.cin,
-            userName: user.userName,
-            lastPassword: user.lastPassword,
-            isValid: user.isValid,
-            imageRes: user.imageRes,
-            role: user.role,
-            numTel: user.numTel,
-            isBanned: user.isBanned,
-            totalTimeSpent: user.totalTimeSpent,
-            banExpirationDate:user.banExpirationDate,
-            loginCount:user.loginCount
+    // First, count the total number of documents
+    User.countDocuments()
+      .then(totalItems => {
+        // Fetch the specified page of users
+        User.find({})
+          .skip(skip)
+          .limit(pageSize)
+          .then(users => {
+            let userList = users.map(user => {
+              return {
+                id: user._id,
+                email: user.email,
+                nom: user.nom,
+                prenom: user.prenom,
+                dateNaissance: user.dateNaissance,
+                adress: user.adress,
+                cin: user.cin,
+                userName: user.userName,
+                lastPassword: user.lastPassword,
+                isValid: user.isValid,
+                imageRes: user.imageRes,
+                role: user.role,
+                numTel: user.numTel,
+                isBanned: user.isBanned,
+                totalTimeSpent: user.totalTimeSpent,
+                banExpirationDate: user.banExpirationDate,
+                loginCount: user.loginCount
+              };
+            });
 
-          };
-        });
-        res.status(200).json(userList);
+            // Return the user list along with pagination details
+            res.status(200).json({
+              users: userList,
+              totalItems,
+              totalPages: Math.ceil(totalItems / pageSize),
+              currentPage: page
+            });
+          })
+          .catch(err => {
+            res.status(500).json({ error: err });
+          });
       })
-      .catch((err) => {
+      .catch(err => {
         res.status(500).json({ error: err });
       });
-  });
-
+//  });
 }
+
 // add user
 
 export async function addUser(req, res) {
