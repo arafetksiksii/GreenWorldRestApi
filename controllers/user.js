@@ -20,60 +20,40 @@ const authToken = '7a3001c6bf1c52995b3d22846d74f02c';
 const client = twilio(accountSid, authToken);
 //recover all users
 export function getAllUsers(req, res) {
+
   //authenticateUser(req, res, () => {
-    // Set default values for page and pageSize, and calculate skip value
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 10;
-    const skip = (page - 1) * pageSize;
+    User.find({})
+      .then((users) => {
+        let userList = users.map((user) => {
+          return {
+            id: user._id,
+            email: user.email,
+            nom: user.nom,
+            prenom: user.prenom,
+            dateNaissance: user.dateNaissance,
+            adress: user.adress,
+            cin: user.cin,
+            userName: user.userName,
+            lastPassword: user.lastPassword,
+            isValid: user.isValid,
+            imageRes: user.imageRes,
+            role: user.role,
+            numTel: user.numTel,
+            isBanned: user.isBanned,
+            totalTimeSpent: user.totalTimeSpent,
+            banExpirationDate:user.banExpirationDate,
+            loginCount:user.loginCount
 
-    // First, count the total number of documents
-    User.countDocuments()
-      .then(totalItems => {
-        // Fetch the specified page of users
-        User.find({})
-          .skip(skip)
-          .limit(pageSize)
-          .then(users => {
-            let userList = users.map(user => {
-              return {
-                id: user._id,
-                email: user.email,
-                nom: user.nom,
-                prenom: user.prenom,
-                dateNaissance: user.dateNaissance,
-                adress: user.adress,
-                cin: user.cin,
-                userName: user.userName,
-                lastPassword: user.lastPassword,
-                isValid: user.isValid,
-                imageRes: user.imageRes,
-                role: user.role,
-                numTel: user.numTel,
-                isBanned: user.isBanned,
-                totalTimeSpent: user.totalTimeSpent,
-                banExpirationDate: user.banExpirationDate,
-                loginCount: user.loginCount
-              };
-            });
-
-            // Return the user list along with pagination details
-            res.status(200).json({
-              users: userList,
-              totalItems,
-              totalPages: Math.ceil(totalItems / pageSize),
-              currentPage: page
-            });
-          })
-          .catch(err => {
-            res.status(500).json({ error: err });
-          });
+          };
+        });
+        res.status(200).json(userList);
       })
-      .catch(err => {
+      .catch((err) => {
         res.status(500).json({ error: err });
       });
-//  });
-}
+  //});
 
+}
 // add user
 
 export async function addUser(req, res) {
@@ -236,16 +216,19 @@ export function getUserById(req, res) {
 }
 
 export async function updateUserById(req, res) {
+  console.log('eeeeeeeeeeeeeeeeeeeee');
+  console.log(req.body);
 
-  console.log('eeeeeeeeeeeeeeeeeeeee')
-  console.log(req.body)
   if (!validationResult(req).isEmpty()) {
     return res.status(400).json({ errors: validationResult(req).array() });
   }
 
   try {
-
     const updatedUserData = {};
+    
+    // Check for id in both request parameters and request body
+    const userId = req.params.id || req.body.id;
+
     Object.keys(req.body).forEach((key) => {
       // Check for non-null, non-undefined, and non-empty string values
       if (key !== 'password' && req.body[key] != null && req.body[key] !== '') {
@@ -253,7 +236,7 @@ export async function updateUserById(req, res) {
       }
     });
 
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedUserData, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true });
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'Utilisateur introuvable' });
@@ -265,6 +248,7 @@ export async function updateUserById(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
 
 
 export function deleteUserById(req, res) {

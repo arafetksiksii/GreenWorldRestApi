@@ -26,8 +26,8 @@ export async function newPassword(req, res) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, newPassword } = req.body;
-
+  const { email, newPassword, password} = req.body;
+ const pass=newPassword||password;
   try {
     const user = await User.findOne({ email });
 
@@ -36,7 +36,7 @@ export async function newPassword(req, res) {
     }
 
     // Update the user's password
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await await bcrypt.hash(pass, 10);
 
     await user.save();
 /*

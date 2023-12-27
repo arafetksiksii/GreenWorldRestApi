@@ -41,6 +41,10 @@ router.put(
 
   updateUserById
 );
+router.put(
+  '/',
+  updateUserById
+);
 
 // Route to update a user's profile by ID
 router.put(
