@@ -513,5 +513,53 @@ router.post('/loginfb', async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+router.get('/connectedusers/:day', async (req, res) => {
+  try {
+    const day = req.params.day;
+    const currentDate = new Date(day);
+
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const skip = (page - 1) * pageSize;
+
+    // Query for the total count of users
+    const totalCount = await DailyStats.countDocuments({
+      date: {
+        $gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()),
+        $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1),
+      },
+      loginCount: { $gt: 0 },
+    });
+
+    // Query for paginated list of users
+    const loggedInUsers = await DailyStats.find({
+      date: {
+        $gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()),
+        $lt: new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1),
+      },
+      loginCount: { $gt: 0 },
+    })
+    .populate('userId')
+    .skip(skip)
+    .limit(pageSize);
+
+    const connectedUsersInfo = loggedInUsers.map((dailyStats) => ({
+      userId: dailyStats.userId._id,
+      email: dailyStats.userId.email,
+      timeConnected: dailyStats.timeSpent, // Assuming timeSpent is the time connected for the day
+      loginCount: dailyStats.loginCount, // Number of logins for the day
+    }));
+
+    // Respond with both the paginated list and the total count
+    res.json({ connectedUsers: connectedUsersInfo, total: totalCount });
+  } catch (error) {
+    console.error('Error fetching connected users:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+  }
+});
+
 export default router;
 
