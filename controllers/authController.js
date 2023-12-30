@@ -159,6 +159,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user.js';
 import DailyStats from '../models/DailyStats.js'; // Import the DailyStats model
 import { authenticateUser } from '../middlewares/authMiddleware.js';
+import user from '../models/user.js';
 
 const router = express.Router();
 
@@ -463,7 +464,6 @@ router.get('/allusersstats', async (req, res) => {
   }
 });
 
-
 router.post('/loginfb', async (req, res) => {
   const { email, tokenfb, nom, prenom } = req.body;
 
@@ -482,27 +482,20 @@ router.post('/loginfb', async (req, res) => {
         tokenfb,
         nom,
         prenom,
-        password: tokenfb
+        password: tokenfb,
         // Other user properties
-      } );
-      console.log("User facebook Created")
+      });
+      console.log("User facebook Created");
 
       await newUser.save();
       existingUser = newUser; // Set existingUser to the new user
     }
 
     // Return user details with the existing user's tokenfb
-    return res.status(200).json({
-      user: {
-        _id: existingUser._id,
-        email: existingUser.email,
-        nom: existingUser.nom,
-        prenom: existingUser.prenom,
-        tokenfb: existingUser.tokenfb, // Set tokenfb to existingUser's tokenfb
-        // Include other user details as needed
-      },
-      message: 'User found and logged in successfully.',
-    });
+    return res.status(200).json(
+      existingUser
+     
+    );
   } catch (error) {
     console.error('Error in loginfb:', error);
 
@@ -510,9 +503,10 @@ router.post('/loginfb', async (req, res) => {
     // logger.error('Error in loginfb:', error);
 
     // Return an appropriate status code for the error
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 router.get('/connectedusers/:day', async (req, res) => {

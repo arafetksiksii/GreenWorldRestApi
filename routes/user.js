@@ -36,7 +36,7 @@ router.post("/reset", sendResetCodeByTel, body('numeTel').isNumeric);
 router.get("/:id", getUserById);
 
 router.put(
-  '/updateUser/:id',
+  '/:id',
  
 
   updateUserById
