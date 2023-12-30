@@ -171,23 +171,27 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials email' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
+
     if (user.isBannedTemp && user.banExpirationDate && new Date() > user.banExpirationDate) {
-  
       user.isBannedTemp = false;
       user.banExpirationDate = null;
       await user.save();
     }
+
     if (user.isBanned) {
       return res.status(401).json({ message: 'User is banned' });
     }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const loginDate = new Date();
+    
     await DailyStats.findOneAndUpdate(
       {
         userId: user._id,
@@ -202,13 +206,28 @@ router.post('/login', async (req, res) => {
       },
       { upsert: true }
     );
-   
+
     user.lastLoginTimestamp = loginDate;
     await user.save();
+
     user.loginCount += 1;
-    const token = jwt.sign({ user: { id: user._id, role: user.role } }, 'your-secret-key', { expiresIn: '1h' });
-    const updatedUser = await User.findByIdAndUpdate(user._id, { token: token, loginCount: user.loginCount });
-    res.json(updatedUser);
+
+    const token = jwt.sign(
+      { user: { id: user._id, role: user.role } },
+      'your-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { token, loginCount: user.loginCount },
+      { new: true } // Return the updated user document
+    );
+
+    // Do not expose sensitive information in the response
+    const { password: _, ...userWithoutPassword } = updatedUser.toObject();
+
+    res.json(userWithoutPassword);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });
