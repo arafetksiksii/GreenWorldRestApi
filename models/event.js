@@ -30,7 +30,9 @@ const eventSchema = new Schema(
         },
         nbPlace: {
             type: Number,
-            required: false
+            required: false,
+            min: 0, // Assurez-vous que cette contrainte permet une valeur de 0
+
         },
         image: {
             type: String ,
@@ -47,12 +49,15 @@ const eventSchema = new Schema(
         comments: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Comment'
+          }],
+          reservations: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Reservation'
           }]
-
       
     },
         {
-            timesStamps: true //date automatique
+            timestamps: true // date automatique
         }
         
 );

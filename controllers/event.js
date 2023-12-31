@@ -4,6 +4,7 @@ export function getAll(req, res) {
     Event
     .find({})
     .populate('comments')  // Indique à Mongoose de remplir le champ 'comments'
+    .populate('reservations')
     .then(docs => {
         res.status(200).json(docs);
     })
@@ -11,28 +12,86 @@ export function getAll(req, res) {
         res.status(500).json({ error: err });
     });
 } 
-export function addOnce(req, res) {
+export function getAllEvents(req, res) {
+  Event.find({})
+  .then((docs) => {
+    let list = [];
+    for (let i = 0; i < docs.length; i++) {
+      list.push({
+        id: docs[i]._id,
+        titre: docs[i].titre,
+        lieu: docs[i].lieu,
+        nbPlace: docs[i].nbPlace,
+        image: docs[i].image,
+        dateDebut: docs[i].dateDebut,
 
+        dateFin: docs[i].dateFin,
+
+        description: docs[i].description,
+
+        Comment: docs[i].comments,
+
+        
+
+
+      });
+    }
+    res.status(200).json(list);
+  })
+  .catch((err) => {
+    res.status(500).json({ error: err });
+  });
+}
+export function getAllCountComments(req, res) {
+  Event.aggregate([
+    {
+      $project: {
+        eventName: 1,  // Ajouter les champs que vous souhaitez inclure
+        commentCount: { $size: '$comments' }
+      }
+    }
+  ])
+    .then(docs => {
+      res.status(200).json(docs);
+    })
+    .catch(err => {
+      res.status(500).json({ error: err });
+    });
+}
+
+
+export function addOnce(req, res) {
   // Trouver les erreurs de validation dans cette requête et les envelopper dans un objet
-  if(!validationResult(req).isEmpty()) {
-      res.status(400).json({ errors: validationResult(req).array() });
-  }
-  else {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+  } else {
+      const { dateDebut, dateFin } = req.body;
+
+      // Vérifier que la date de début est avant la date de fin
+      if (new Date(dateDebut) >= new Date(dateFin)) {
+          return res.status(400).json({ error: "La date de début doit être avant la date de fin." });
+      }
+
+      // Vérifier que les dates sont à partir de 2023
+      const currentYear = new Date().getFullYear();
+      if (new Date(dateDebut).getFullYear() < 2023 || new Date(dateFin).getFullYear() < 2023) {
+          return res.status(400).json({ error: "Les dates doivent être à partir de l'année 2023." });
+      }
+      console.log(req.file);
       // Invoquer la méthode create directement sur le modèle
-      Event
-      .create({
+      Event.create({
           titre: req.body.titre,
           dateDebut: req.body.dateDebut,
           dateFin: req.body.dateFin,
           lieu: req.body.lieu,
           description: req.body.description,
-          nbparticipant: req.body.nbparticipant,
           nbPlace: req.body.nbPlace,
           // Récupérer l'URL de l'image pour l'insérer dans la BD
           image: req.file.filename,
           longitude: req.body.longitude,
           latitude: req.body.latitude
-
       })
       .then(newEvent => {
           res.status(200).json(newEvent);
@@ -40,11 +99,46 @@ export function addOnce(req, res) {
       .catch(err => {
           res.status(500).json({ error: err });
       });
-    }
+  }
 }
 
-export function putOnce(req, res) {
-    res.status(200).json({ message: "Updated !", titre: req.params.titre});
+export async function putOnce(req, res) {
+  const eventId = req.params.id;
+
+  try {
+    // Retrieve the existing event from the database
+    const existingEvent = await Event.findById(eventId);
+
+    if (!existingEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    // Update the fields based on the request data
+    existingEvent.titre = req.body.titre;
+    existingEvent.dateDebut = req.body.dateDebut;
+    existingEvent.dateFin = req.body.dateFin;
+    existingEvent.lieu = req.body.lieu;
+    existingEvent.description = req.body.description;
+    existingEvent.nbPlace = req.body.nbPlace;
+
+    // Check if a new image file is provided
+    if (req.file !== undefined) {
+      existingEvent.image = req.file.filename;
+    }
+
+    // Update other fields like latitude and longitude if needed
+    existingEvent.longitude = req.body.longitude;
+    existingEvent.latitude = req.body.latitude;
+
+    // Save the updated event back to the database
+    await existingEvent.save();
+
+    // Send a response to the client
+    res.status(200).json({ message: 'Event updated successfully' });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 }
 /**
  * Mettre à jour plusieurs documents
@@ -201,3 +295,5 @@ export function getRandomEvent(req, res) {
         res.status(500).json({ error: err });
       });
   }
+
+    

@@ -192,7 +192,7 @@ export async function getCommentsForEvent(eventID, req) {
       path: 'comments',
       populate: {
         path: 'userID', // Remplacez 'userID' par le champ approprié dans votre modèle Comment
-        select: 'email', // Sélectionnez les champs que vous souhaitez afficher
+        select: 'userName imageRes', // Inclure le champ 'userImage'
       },
     });
 
@@ -201,7 +201,10 @@ export async function getCommentsForEvent(eventID, req) {
         _id: comment._id,
         Contenu: comment.Contenu,
         date: comment.date,
-        userID: comment.userID._id,
+        userName: comment.userID.userName, // Utilisez la propriété userName de l'utilisateur
+        userImage: comment.userID.imageRes, // Ajoutez le champ 'userImage'
+        userID: comment.userID._id, // Ajoutez l'userID ici
+
       }));
     } else {
       console.log("Événement non trouvé");
@@ -213,6 +216,7 @@ export async function getCommentsForEvent(eventID, req) {
     return [];
   }
 }
+
 
 
 export function trierparDateCom(req, res) {
@@ -256,5 +260,3 @@ export function trierparDateCom(req, res) {
   }
 }
  */
-
-

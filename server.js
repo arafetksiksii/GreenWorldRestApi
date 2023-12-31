@@ -1,4 +1,3 @@
-// App.js
 import express from 'express';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
@@ -75,6 +74,6 @@ app.use('/evt', (req, res, next) => {
   next();  
 });
 app.listen(port, () => {
-  console.log(`Server running at https://192.168.1.16::${port}/`);
+  console.log(`Server running at http://localhost::${port}/`);
 });  
   

@@ -22,6 +22,9 @@ const commentSchema = new Schema(
         
 
     },
+    {
+        timestamps: true // date automatique
+    }
         
 );
     
