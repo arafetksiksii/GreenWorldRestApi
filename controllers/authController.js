@@ -377,9 +377,11 @@ router.post('/loginiios', async (req, res) => {
         email: user.email,
         nom: user.nom,
         prenom: user.prenom,
+        role:user.role,
         // Include other user details as needed
       },
       token: token,
+      role:user.role,
     });
   } catch (error) {
     console.error(error);
