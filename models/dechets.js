@@ -18,8 +18,20 @@ const DechetsSchema = new Schema(
         adresse: {
             type: String,
             required: true
-        }
-       
+        },
+        
+        etat: {
+            type: String,
+            enum: ['en_attente', 'confirme', 'rejete', 'en_traitement'],
+            default: 'en_attente',
+          },
+      
+          userID: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User', 
+            required: false,
+          },
+
     },
     {
         timestamps: true
