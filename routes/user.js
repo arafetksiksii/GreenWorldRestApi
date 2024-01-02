@@ -37,6 +37,7 @@ router.get("/:id", getUserById);
 
 router.put(
   '/:id',
+  multer("image", 5 * 1024 * 1024), // Multer middleware should come before validation
  
 
   updateUserById

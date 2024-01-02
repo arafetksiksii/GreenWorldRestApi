@@ -215,20 +215,25 @@ export function getUserById(req, res) {
     });
 }
 
+
 export async function updateUserById(req, res) {
   console.log('eeeeeeeeeeeeeeeeeeeee');
   console.log(req.body);
 
-  if (!validationResult(req).isEmpty()) {
-    return res.status(400).json({ errors: validationResult(req).array() });
-  }
-
   try {
-    const updatedUserData = {};
-    
+    if (!validationResult(req).isEmpty()) {
+      return res.status(400).json({ errors: validationResult(req).array() });
+    }
+
     // Check for id in both request parameters and request body
     const userId = req.params.id || req.body.id;
 
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const updatedUserData = {};
+    
     Object.keys(req.body).forEach((key) => {
       // Check for non-null, non-undefined, and non-empty string values
       if (key !== 'password' && req.body[key] != null && req.body[key] !== '') {
@@ -236,6 +241,23 @@ export async function updateUserById(req, res) {
       }
     });
 
+    // Handle image upload
+    const imageData = req.file ? req.file.path : null;
+
+    // Assuming the uploadImage function returns a response object with a secure_url property
+    let imageUrl = '';
+
+    if (imageData) {
+      const cloudinaryResponse = await uploadImage(imageData);
+      imageUrl = cloudinaryResponse.secure_url;
+    }
+
+    // If imageUrl is not empty, update user data including the image URL
+    if (imageUrl !== '') {
+      updatedUserData.imageRes = imageUrl;
+    }
+
+    // Update user data
     const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true });
 
     if (!updatedUser) {
@@ -248,6 +270,7 @@ export async function updateUserById(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
 
 
 
