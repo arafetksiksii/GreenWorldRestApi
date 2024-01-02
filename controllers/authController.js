@@ -310,6 +310,10 @@ router.get('/loggeduser', authenticateUser, async (req, res) => {
 
 router.post('/loginiios', async (req, res) => {
   const { email, password } = req.body;
+  // Check if the request body is null
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required in the request body' });
+  }
 
   try {
     const user = await User.findOne({ email });
@@ -483,6 +487,8 @@ router.get('/allusersstats', async (req, res) => {
   }
 });
 
+
+
 router.post('/loginfb', async (req, res) => {
   const { email, tokenfb, nom, prenom } = req.body;
 
@@ -504,17 +510,36 @@ router.post('/loginfb', async (req, res) => {
         password: tokenfb,
         // Other user properties
       });
+
       console.log("User facebook Created");
 
       await newUser.save();
       existingUser = newUser; // Set existingUser to the new user
     }
 
-    // Return user details with the existing user's tokenfb
-    return res.status(200).json(
-      existingUser
-     
+    const token = jwt.sign(
+      { user: { id: existingUser._id, role: existingUser.role } },
+      'your-secret-key',
+      { expiresIn: '1h' }
     );
+
+    // Update the existing user with the new token and increment loginCount
+    existingUser = await User.findByIdAndUpdate(
+      existingUser._id,
+      { token, $inc: { loginCount: 1 } }, // Increment loginCount by 1
+      { new: true }
+    );
+
+    // Return user details with the existing user's tokenfb
+    return res.status(200).json({
+      user: {
+        _id: existingUser._id,
+        email: existingUser.email,
+        tokenfb: existingUser.tokenfb,
+        // Other user properties you want to include in the response
+      },
+      token,
+    });
   } catch (error) {
     console.error('Error in loginfb:', error);
 
