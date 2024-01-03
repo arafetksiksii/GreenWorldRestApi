@@ -6,7 +6,7 @@
  */
 
 import express from 'express';
-import { banUser, unbanUser, banUserWithDuration,verifyResetCode,newPassword,getBannedUsers } from '../controllers/adminController.js';
+import { banUser, unbanUser, banUserWithDuration,verifyResetCode,newPassword,getBannedUsers ,resetPassword} from '../controllers/adminController.js';
 import { body } from 'express-validator';
 
 const router = express.Router();
@@ -47,6 +47,7 @@ router.put(
 
 router.get('/getBannedUsers',getBannedUsers)
 router.put('/newPassword',newPassword)
+router.put('/r',resetPassword)
 router.post('/verifyResetCode',verifyResetCode)
 /**
  * @swagger
