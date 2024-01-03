@@ -10,6 +10,7 @@ import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
 import userRoutes from './routes/user.js';
+import pointCollectRoutes from './routes/pointCollect.js';
 import dechetsRoutes from './routes/dechets.js';
 import TypeRoutes from './routes/type.js';
 import eventRoutes from './routes/event.js';
@@ -57,9 +58,8 @@ app.use('/produit', produitRoutes);
 app.use('/commande', commandeRoutes);
 app.use('/favproduit', favproduitRoutes);
 app.use('/type', TypeRoutes);
-
+app.use('/point',pointCollectRoutes); 
 app.use('/dechets', dechetsRoutes);
-
 app.use('/quiz', quizRoutes);
 app.use('/question', questionRoutes);
 app.use('/resultatQuiz', resultatQuizRoutes);
