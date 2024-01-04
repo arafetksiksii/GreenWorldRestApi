@@ -18,6 +18,7 @@ import bodyParser from 'body-parser';
 import authController from './controllers/authController.js';
 import  reservationRoutes from './routes/reservation.js';  // Assurez-vous que le chemin est correct
 import   adminRoutes from './routes/adminRoutes.js';
+import chatcontroller from './controllers/chatgpt.js';
 
 
 import swaggerUi from 'swagger-ui-express';
@@ -50,6 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/img', express.static('public/images'));
 app.use('/auth', authController); // Ajout de la route d'authentification
+app.use('/', chatcontroller); //
 app.use('/admin',adminRoutes)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/user', userRoutes);
