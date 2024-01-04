@@ -15,6 +15,18 @@ const produitSchema = new Schema(
             type: String,
             required: true
         },
+        image2: {
+            type: String,
+            required: false
+        },
+        image3: {
+            type: String,
+            required: false
+        },
+        category: {
+            type: String,
+            required: false
+        },
         price: {
             type: Number,
             required: true

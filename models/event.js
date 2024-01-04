@@ -2,25 +2,23 @@ import mongoose from 'mongoose';
 const  { Schema,model } =mongoose;
 const eventSchema = new Schema(
     {
+
         titre: {
             type: String,
             required: true
         },
         dateDebut: {
-            type: Date,
-            required: true
+            type: String,
+            required: false
         },
         dateFin: {
-            type: Date,
-            required: true
-        },
-        image: {
             type: String,
-            required: true
+            required: false
+            
         },
         lieu: {
             type: String,
-            required: true
+            required: false
         },
         description: {
             type: String,
@@ -28,12 +26,40 @@ const eventSchema = new Schema(
         },
         nbparticipant: {
             type: Number,
-            required: true
+            required: false
         },
+        nbPlace: {
+            type: Number,
+            required: false,
+            min: 0, // Assurez-vous que cette contrainte permet une valeur de 0
+
+        },
+        image: {
+            type: String ,
+            required: false
+        },
+        latitude: {
+            type: Number,
+            required: false
+        },
+        longitude: {
+            type: Number,
+            required: false
+        },
+        comments: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+          }],
+          reservations: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Reservation'
+          }]
+      
     },
         {
-            timesStamps: true //date automatique
+            timestamps: true // date automatique
         }
+        
 );
     
 export default model("Event", eventSchema);

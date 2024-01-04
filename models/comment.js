@@ -9,16 +9,22 @@ const commentSchema = new Schema(
         date: { type: Date, 
             default: Date.now },
 
-        auteur: {
-            type: String,
-            required: true
-        },
-        EventID: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'comment',
-            require: true,
-        },
+            eventID: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Event', 
+                required: true,
+              },
+              userID: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User', 
+                required: true,
+              },
+        
+
     },
+    {
+        timestamps: true // date automatique
+    }
         
 );
     

@@ -8,12 +8,17 @@ export function getAll(req, res) {
       let list = [];
       for (let i = 0; i < docs.length; i++) {
         list.push({
-          id: docs[i]._id,
+          _id: docs[i]._id,
           title: docs[i].title,
           description: docs[i].description,
           price: docs[i].price,
           quantity: docs[i].quantity,
+          category: docs[i].category,
           image: docs[i].image,
+          image2: docs[i].image2,
+          image3: docs[i].image3,
+
+
         });
       }
       res.status(200).json(list);
@@ -32,7 +37,12 @@ export function addOnce(req, res) {
       description: req.body.description,
       price: req.body.price,
       quantity: req.body.quantity,
+      category: req.body.category,
+
       image: `http://192.168.1.166:9090/img/${req.file.filename}`,
+      image2: req.body.image2,
+      image3: req.body.image3,
+
     })
       .then((newProduit) => {
         res.status(200).json({
@@ -40,7 +50,11 @@ export function addOnce(req, res) {
           description: newProduit.description,
           price: newProduit.price,
           quantity: newProduit.quantity,
+          category: newProduit.category,
+
           image: newProduit.image,
+          image2: newProduit.image2,
+          image3: newProduit.image3,
         });
       })
       .catch((err) => {
@@ -75,7 +89,12 @@ export function putOnce(req, res) {
       description: req.body.description,
       price: req.body.price,
       quantity: req.body.quantity,
-      image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`
+      category: req.body.category,
+
+      image: `${req.protocol}://${req.get("host")}/img/${req.file.filename}`,
+      image2: req.body.image2,
+      image3: req.body.image3
+
     }
   }
   Produit.findByIdAndUpdate(req.params.id, newProduit)

@@ -75,6 +75,7 @@ export function updateQuestionById(req, res) {
 
 
 export function getQuestionsByQuizId(req, res) {
+    console.log(req.body)
     const quizId = req.params.id_quiz;
     console.log("Requête reçue pour l'ID de quiz:", quizId);
 
