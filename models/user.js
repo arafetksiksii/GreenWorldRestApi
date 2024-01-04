@@ -47,7 +47,7 @@ const userSchema = new Schema(
     },
     isValid: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     imageRes: {
       type: String,

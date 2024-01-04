@@ -378,8 +378,10 @@ router.post('/loginiios', async (req, res) => {
         nom: user.nom,
         prenom: user.prenom,
         role:user.role,
+        isValid:user.isValid,
         // Include other user details as needed
       },
+      isValid:user.isValid,
       token: token,
       role:user.role,
     });
