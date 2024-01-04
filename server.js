@@ -58,5 +58,5 @@ app.use(notFoundError);
 app.use(errorHandler);
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost::${port}/`);
+  console.log(`Server running at http:// 172.20.10.4::${port}/`);
 });

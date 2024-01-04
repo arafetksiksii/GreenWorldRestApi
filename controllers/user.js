@@ -24,7 +24,7 @@ export function getAllUsers(req, res) {
         return {
           id: user._id,
           email: user.email,
-          nom: user.nom,
+          nom: user.nom, 
           prenom: user.prenom,
           dateNaissance: user.dateNaissance,
           adress: user.adress,
