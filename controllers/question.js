@@ -13,6 +13,7 @@ export function getQuestions(req, res) {
 }
 
 export function addQuestion(req, res) {
+    console.log(req.body)
     if (!validationResult(req).isEmpty()) {
         return res.status(400).json({ errors: validationResult(req).array() });
     }
