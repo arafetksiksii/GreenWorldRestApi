@@ -5,7 +5,7 @@ import cors from 'cors';
 import { notFoundError, errorHandler } from './middlewares/error-handler.js';
 import produitRoutes from './routes/produit.js';
 import commandeRoutes from './routes/commande.js';
-import favproduitRoutes from './routes/produit.js';
+import favproduitRoutes from './routes/favproduit.js';
 import quizRoutes from './routes/quiz.js';
 import questionRoutes from './routes/question.js';
 import resultatQuizRoutes from './routes/resultatQuiz.js';
@@ -19,7 +19,9 @@ import bodyParser from 'body-parser';
 import authController from './controllers/authController.js';
 import  reservationRoutes from './routes/reservation.js';  // Assurez-vous que le chemin est correct
 import   adminRoutes from './routes/adminRoutes.js';
+import chacontroller from './controllers/chatgpt.js'
 
+import   statRoutes from './routes/statistiques.js';
 
 import swaggerUi from 'swagger-ui-express';
 import specs from './swagger.js'; // Importez le fichier de configuration Swagger
@@ -47,6 +49,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/',chacontroller)
 
 // Routes
 app.use('/img', express.static('public/images'));
@@ -65,6 +68,8 @@ app.use('/question', questionRoutes);
 app.use('/resultatQuiz', resultatQuizRoutes);
 app.use('/event', eventRoutes);
 app.use('/comment', CommentRoute);
+app.use('/stat', statRoutes);
+
 app.use('/api', reservationRoutes);  // Vous pouvez ajuster le préfixe '/api' en fonction de vos besoins
 app.use(notFoundError);
 app.use(errorHandler);

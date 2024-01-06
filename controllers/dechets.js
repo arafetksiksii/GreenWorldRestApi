@@ -2,6 +2,9 @@ import { validationResult } from "express-validator";
 
 import Dechets from "../models/dechets.js";
 
+
+
+
 export function getAll(req, res) {
     Dechets.find({})
     .then((docs) => {
@@ -14,6 +17,8 @@ export function getAll(req, res) {
           nombre_capacite: docs[i].nombre_capacite,
           adresse: docs[i].adresse,
           etat: docs[i].etat,
+        //  latitude: docs[i].latitude,
+         // longitude:docs[i].longitude,
 
         });
       }
@@ -100,7 +105,8 @@ export async function addOnce(req, res) {
         nombre_capacite: req.body.nombre_capacite,
         adresse: req.body.adresse,
         userID: req.body.userID,
-
+latitude:req.body.latitude,
+longitude:req.body.longitude
       })
         .then((newDechets) => {
           res.status(200).json({
@@ -109,6 +115,8 @@ export async function addOnce(req, res) {
             nombre_capacite: newDechets.nombre_capacite,
             adresse: newDechets.adresse,
             etat: newDechets.etat,
+            latitude:newDechets.latitude,
+            longitude:newDechets.longitude
           });
         })
         .catch((err) => {
@@ -121,6 +129,39 @@ export async function addOnce(req, res) {
   }
 }
 
+// export async function addOnce(req, res) {
+//   try {
+//     if (!validationResult(req).isEmpty()) {
+//       return res.status(400).json({ errors: validationResult(req).array() });
+//     } else {
+//       const newDechets = {
+//         typeDechets: req.body.typeDechets,
+//         date_depot: req.body.date_depot,
+//         nombre_capacite: req.body.nombre_capacite,
+//         adresse: req.body.adresse,
+//         userID: req.body.userID,
+//       };
+
+//       const createdDechets = await Dechets.create(newDechets);
+
+//       // Mettez à jour le nombre de déchets ajoutés par l'utilisateur
+//       await User.findByIdAndUpdate(req.body.userID, {
+//         $inc: { nombre_dechets_ajoutes: 1 }
+//       });
+
+//       res.status(200).json({
+//         typeDechets: createdDechets.typeDechets,
+//         date_depot: createdDechets.date_depot,
+//         nombre_capacite: createdDechets.nombre_capacite,
+//         adresse: createdDechets.adresse,
+//         etat: createdDechets.etat,
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error in addOnce:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// }
 
 
 export function getOnce(req, res) {
@@ -227,3 +268,5 @@ export async function updateDechetState(req, res) {
     return res.status(500).json({ error: 'Erreur serveur' });
   }
 }
+
+

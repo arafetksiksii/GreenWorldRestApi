@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Create a new "Favproduit"
 router.post('/', async (req, res) => {
-  const userId = "6550afa009316488cc193ed1"
+  const userId = "655ddc80d5849d7349c150f6"
   try {
     const { selectedProducts } = req.body;
 
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 // Add products to a "Favproduit"
 router.post('/add-products', async (req, res) => {
   try {
-    const userId = "6550afa009316488cc193ed1";
+    const userId = "655ddc80d5849d7349c150f6";
     const produitId = req.query.produitId;
 
     // Fetch the existing Favproduit for the user
@@ -82,7 +82,7 @@ router.post('/add-products', async (req, res) => {
 
 router.delete('/delete-product', async (req, res) => {
   try {
-    const userId = "6550afa009316488cc193ed1";
+    const userId = "655ddc80d5849d7349c150f6";
     const produitId = req.query.produitId;
 
     // Fetch the existing command for the user
@@ -128,7 +128,7 @@ router.delete('/delete-product', async (req, res) => {
 // Retrieve a "favproduit" by its ID
 router.get('/favorites', async (req, res) => {
   try {
-    const userId = "6550afa009316488cc193ed1";
+    const userId = "655ddc80d5849d7349c150f6";
 
     const favproduit = await Favproduit.findOne({ userId });
 

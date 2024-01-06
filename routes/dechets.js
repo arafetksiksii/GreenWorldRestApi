@@ -1,6 +1,13 @@
 import express from "express";
 import { body,query } from "express-validator";
-import { getAll, addOnce, getOnce, putOnce ,deleteOnce,updateDechetState,getAllForUser
+import { getAll, 
+  addOnce,
+   getOnce,
+    putOnce ,
+    deleteOnce,
+    updateDechetState,
+    getAllForUser,
+
 } from "../controllers/dechets.js";
 import Dechets from '../models/dechets.js';
 
@@ -51,6 +58,76 @@ router
   .put(updateDechetState);
 
   router.get('/user/:userId', getAllForUser);
+
+
+  router.get('/api/statistics', async (req, res) => {
+    try {
+      const result = await Dechets.aggregate([
+        {
+          $lookup: {
+            from: 'users',  // Update 'users' to the actual name of your User collection
+            localField: 'userID',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: '$user',
+        },
+        {
+          $group: {
+            _id: '$userID',
+            userEmail: { $first: '$user.email' },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+  
+      res.json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+// Route pour obtenir le nombre total de déchets enregistrés
+router.get('/stats/total', async (req, res) => {
+  try {
+      const totalDechets = await Dechets.countDocuments();
+      res.json({ totalDechets });
+  } catch (error) {
+      res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+router.get('/statistiques', async (req, res) => {
+  try {
+      const stats = await Dechets.aggregate([
+          {
+              $group: {
+                  _id: { $dateToString: { format: '%Y-%m-%d', date: '$date_depot' } },
+                  count: { $sum: 1 }
+              }
+          },
+          {
+              $sort: { _id: 1 }
+          }
+      ]);
+      res.json(stats);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Erreur lors de la récupération des statistiques temporelles' });
+  }
+});
+// Route pour obtenir le nombre de déchets par état
+router.get('/stats/byStatus', async (req, res) => {
+  try {
+      const statsByStatus = await Dechets.aggregate([
+          { $group: { _id: '$etat', count: { $sum: 1 } } }
+      ]);
+      res.json(statsByStatus);
+  } catch (error) {
+      res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 
 export default router;

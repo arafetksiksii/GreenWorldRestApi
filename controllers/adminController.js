@@ -68,6 +68,44 @@ export async function newPassword(req, res) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
+export async function resetPassword(req, res, next) {
+  console.log(req.body);
+
+  const token = req.body.email;
+  try {
+    const decoded = jwt.verify(token, 'your-secret-key'); // Replace 'your-secret-key' with your actual secret key
+    req.user = decoded.user;
+
+    // Hacher le mot de passe avec le sel
+    const hash = await bcrypt.hash(req.body.password, 10);
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { password: hash },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({ message: 'Password changed!', user });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+
+    // Check the type of error thrown by jwt.verify
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token has expired' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Handle other types of errors as needed
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+}
 export async function banUser(req, res) {
     const userId = req.params.id; // ou tout autre moyen d'obtenir l'ID de l'utilisateur à bannir
   

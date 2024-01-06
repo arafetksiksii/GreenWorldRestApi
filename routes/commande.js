@@ -47,14 +47,60 @@ router.post('/', async (req, res) => {
   }
 });
 
-
-// add products to a commande 
-
-// Add products to a "commande"
-// Add products to a "commande"
-router.post('/add-products', authenticateUser, async (req, res) => {
+router.delete('/delete-product', async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = "655f7a41e7c5d11f0bd76ea0";
+    const produitId = req.query.produitId;
+
+    // Fetch the existing command for the user
+    let commande = await Commande.findOne({ userId });
+
+    // If the user doesn't have an existing command, return an error
+    if (!commande) {
+      return res.status(404).json({ error: 'Command not found' });
+    }
+
+    // Find the index of the product in the selectedProducts array
+    const productIndex = commande.selectedProducts.findIndex(
+      (selectedProduct) => selectedProduct.produit && selectedProduct.produit.toString() === produitId
+      );
+    // If the product is not found, return an error
+    if (productIndex === -1) {
+      return res.status(404).json({ error: 'Product not found in the command' });
+    }
+
+    // Get the price of the product being removed
+    const removedProductPrice = commande.selectedProducts[productIndex].price;
+
+    // Remove the product from the selectedProducts array
+    commande.selectedProducts.splice(productIndex, 1);
+
+    // Recalculate the total price
+    const newTotalPrice = commande.selectedProducts.reduce((total, product) => {
+      return total + product.price * product.quantity;
+    }, 0);
+
+    // Update the total price in the command
+    commande.totalPrice = newTotalPrice;
+
+    // Save the updated command
+    const updatedCommande = await commande.save();
+
+    res.json(updatedCommande);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+// add products to a commande
+
+// Add products to a "commande"
+// Add products to a "commande"
+// ... (existing code)
+
+// Add products to a "commande"
+router.post('/add-products', async (req, res) => {
+  try {
+    const userId = "655f7a41e7c5d11f0bd76ea0";
     const produitId = req.query.produitId;
 
     // Fetch the existing commande for the user
@@ -68,7 +114,7 @@ router.post('/add-products', authenticateUser, async (req, res) => {
 
     // Check if the product is already in the selectedProducts array
     const existingProductIndex = commande.selectedProducts.findIndex(
-      (selectedProduct) => selectedProduct.produit.toString() === produitId
+      (selectedProduct) => selectedProduct.produit && selectedProduct.produit.toString() === produitId
     );
 
     if (existingProductIndex !== -1) {
@@ -101,60 +147,41 @@ router.post('/add-products', authenticateUser, async (req, res) => {
     commande.totalPrice = totalPrice;
 
     const updatedCommande = await commande.save();
-    res.json(updatedCommande);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
 
+    // Send email with order details
+    const mailOptions = {
+      from: 'arafetksiksi7@gmail.com',
+      to: 'arafet.ksiksi@esprit.tn',
+      subject: 'New Order',
+      text: formatOrderDetails(updatedCommande),
+    };
 
-
-
-router.delete('/delete-product', async (req, res) => {
-  try {
-    const userId = "655f7a41e7c5d11f0bd76ea0";
-    const produitId = req.query.produitId;
-
-    // Fetch the existing command for the user
-    let commande = await Commande.findOne({ userId });
-
-    // If the user doesn't have an existing command, return an error
-    if (!commande) {
-      return res.status(404).json({ error: 'Command not found' });
-    }
-
-    // Find the index of the product in the selectedProducts array
-    const productIndex = commande.selectedProducts.findIndex(
-      (selectedProduct) => selectedProduct.produit.toString() === produitId
-    );
-
-    // If the product is not found, return an error
-    if (productIndex === -1) {
-      return res.status(404).json({ error: 'Product not found in the command' });
-    }
-
-    // Get the price of the product being removed
-    const removedProductPrice = commande.selectedProducts[productIndex].price;
-
-    // Remove the product from the selectedProducts array
-    commande.selectedProducts.splice(productIndex, 1);
-
-    // Recalculate the total price
-    const newTotalPrice = commande.selectedProducts.reduce((total, product) => {
-      return total + product.price * product.quantity;
-    }, 0);
-
-    // Update the total price in the command
-    commande.totalPrice = newTotalPrice;
-
-    // Save the updated command
-    const updatedCommande = await commande.save();
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
 
     res.json(updatedCommande);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
+// Helper function to format order details
+function formatOrderDetails(commande) {
+  return `New order received!\n\nOrder Details:\n\n${formatCartDetails(commande.selectedProducts)}\nTotal Price: ${commande.totalPrice} TND`;
+}
+
+// ... (existing code)
+
+
+
+
+
+
 
 // Other routes...
 
@@ -214,7 +241,7 @@ router.post('/create-payment-intent', async (req, res) => {
          deleteCommandeById(commande._id);
 
         console.log('Email sent:', info.response);
-        
+       
       }
     });
 
@@ -232,6 +259,20 @@ function formatCartDetails(selectedProducts) {
     return `${product.title}: ${product.quantity} x ${product.price} TND`;
   }).join('\n');
 }
+
+router.get('/all-commandes', async (req, res) => {
+  try {
+    // Fetch all commandes from the database
+    const allCommandes = await Commande.find();
+
+    // Send the list of commandes in the response
+    res.json(allCommandes);
+  } catch (error) {
+    // Handle any errors that occur during the retrieval process
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 router.post('/create-payment-intent2', async (req, res) => {
   try {

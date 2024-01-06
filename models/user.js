@@ -63,10 +63,15 @@ const userSchema = new Schema(
       enum: ['admin', 'user'],
       default: 'admin',
     },
+    points: {
+      type: Number,
+      default: 0,
+    },
     isBanned: {
       type: Boolean,
       default: false,
     },
+
     banExpirationDate: {
       type: Date,
       default: null,

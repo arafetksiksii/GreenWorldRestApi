@@ -8,7 +8,7 @@ const DechetsSchema = new Schema(
             required: true
         },
         date_depot: {
-            type: String,
+            type: Date,
             required: true
         },
         nombre_capacite: {
@@ -25,11 +25,19 @@ const DechetsSchema = new Schema(
             enum: ['en_attente', 'confirme', 'rejete', 'en_traitement'],
             default: 'en_attente',
           },
+          latitude: {
+            type: Number,
+            required: false
+        },
+        longitude: {
+            type: Number,
+            required: false
+        },
       
           userID: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User', 
-            required: false,
+            required: true,
           },
 
     },

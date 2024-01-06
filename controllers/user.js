@@ -496,7 +496,38 @@ export async function sendResetCode(req, res) {
   }
 }
 
+export async function deductUserPoints(req, res) {
+  const { userId } = req.params;
 
+  try {
+    const user = await User.findByIdAndUpdate(userId, { $inc: { points: -10 } }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ points: user.points });
+  } catch (error) {
+    console.error("Error deducting user points:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+export async function updateUserPoints(req, res) {
+  const { userId } = req.params;
+
+  try {
+      const user = await User.findByIdAndUpdate(userId, { $inc: { points: 10 } }, { new: true });
+
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({ points: user.points });
+  } catch (error) {
+      console.error("Error updating user points:", error);
+      res.status(500).json({ error: "Internal server error" });
+  }
+}
 
 export async function updatePassword(req, res) {
 

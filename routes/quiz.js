@@ -5,7 +5,7 @@ import {
     getAllQuiz,
     addOnceQuiz,
     getQuizByName,
-    updateQuizByName,
+    updateQuizByName, 
   deleteQuizById,
   
 } from "../controllers/quiz.js"; // Assurez-vous d'importer les bonnes fonctions du controller

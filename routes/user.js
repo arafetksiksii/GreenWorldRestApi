@@ -12,7 +12,10 @@ import {
   updateScoreById,
   deleteUserById,
   resetPassword,
-  updatePassword
+  updatePassword,
+  updateUserPoints,
+  deductUserPoints
+
 } from "../controllers/user.js";
 
 const router = express.Router();
@@ -52,6 +55,15 @@ router.put(
   updateScoreById
 );
 
+router.put
+("/users/:userId/points",
+ updateUserPoints
+ );
+ router.put
+("/users/:userId/deletepoints",
+deductUserPoints
+ );
+ 
 // Route to update a user's profile by ID
 router.put(
   "/updateR",  // New route path
