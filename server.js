@@ -54,6 +54,7 @@ app.use('/',chacontroller)
 // Routes
 app.use('/img', express.static('public/images'));
 app.use('/auth', authController); // Ajout de la route d'authentification
+app.use('/', chatcontroller); //
 app.use('/admin',adminRoutes)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/user', userRoutes);

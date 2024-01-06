@@ -153,7 +153,8 @@ router.get('/loggeduser', authenticateUser, async (req, res) => {
 export default router;
 
 
-*/import express from 'express';
+*/
+import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from '../models/user.js';
@@ -380,6 +381,7 @@ router.post('/loginiios', async (req, res) => {
         role:user.role,
         // Include other user details as needed
       },
+      isValid:user.isValid,
       token: token,
       role:user.role,
     });

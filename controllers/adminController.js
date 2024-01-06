@@ -220,6 +220,89 @@ export async function banUserWithDuration(req, res) {
     }
   }
 
+
+  export async function resetPassword(req, res, next) {
+    console.log(req.body);
+  
+    const token = req.body.email;
+    try {
+      const decoded = jwt.verify(token, 'your-secret-key'); // Replace 'your-secret-key' with your actual secret key
+      req.user = decoded.user;
+  
+      // Hacher le mot de passe avec le sel
+      const hash = await bcrypt.hash(req.body.password, 10);
+  
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        { password: hash },
+        { new: true }
+      );
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      return res.status(200).json({ message: 'Password changed!', user });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+  
+      // Check the type of error thrown by jwt.verify
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token has expired' });
+      } else if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+  
+      // Handle other types of errors as needed
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  
+  }
+  // Export the sendResetCodeByTel function
+  export async function sendResetCodeByTel(req, res) {
+    const errors = validationResult(req);
+  
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+  
+    const { email } = req.body;
+    console.log(email)
+    try {
+      const user = await User.findOne({ email });
+      console.log(user)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const resetCode = generateResetCode();
+  
+      // Send SMS using Twilio
+      client.messages.create({
+        body: `Your password reset code is: ${resetCode}`,
+        from: '+18638247637',
+        to: user.numTel, // Assuming you have a phone field in your user model
+      });
+  
+      // Save the reset code in the user document
+      user.resetCode = resetCode;
+      user.save();
+  
+      // Create and sign a JWT token
+      const token = jwt.sign({ user: { id: user._id, role: user.role, resetCode } }, 'your-secret-key', { expiresIn: '1h' });
+  
+      // Return the user along with the reset code
+      res.json({ user, token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+  function generateResetCode() {
+    return Math.floor(1000 + Math.random() * 9000);
+  }
+  
+
   export async function verifyResetCode(req, res) {
    console.log(req.body)
    console.log("eeeeeeeeeeeeee")

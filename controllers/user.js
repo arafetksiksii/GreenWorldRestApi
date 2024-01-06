@@ -23,6 +23,7 @@ export function getAllUsers(req, res) {
 
   //authenticateUser(req, res, () => {
     User.find({})
+    .sort({ score: -1 })
       .then((users) => {
         let userList = users.map((user) => {
           return {
@@ -54,6 +55,7 @@ export function getAllUsers(req, res) {
   //});
 
 }
+
 // add user
 
 export async function addUser(req, res) {
@@ -215,20 +217,25 @@ export function getUserById(req, res) {
     });
 }
 
+
 export async function updateUserById(req, res) {
   console.log('eeeeeeeeeeeeeeeeeeeee');
   console.log(req.body);
 
-  if (!validationResult(req).isEmpty()) {
-    return res.status(400).json({ errors: validationResult(req).array() });
-  }
-
   try {
-    const updatedUserData = {};
-    
+    if (!validationResult(req).isEmpty()) {
+      return res.status(400).json({ errors: validationResult(req).array() });
+    }
+
     // Check for id in both request parameters and request body
     const userId = req.params.id || req.body.id;
 
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const updatedUserData = {};
+    
     Object.keys(req.body).forEach((key) => {
       // Check for non-null, non-undefined, and non-empty string values
       if (key !== 'password' && req.body[key] != null && req.body[key] !== '') {
@@ -236,6 +243,23 @@ export async function updateUserById(req, res) {
       }
     });
 
+    // Handle image upload
+    const imageData = req.file ? req.file.path : null;
+
+    // Assuming the uploadImage function returns a response object with a secure_url property
+    let imageUrl = '';
+
+    if (imageData) {
+      const cloudinaryResponse = await uploadImage(imageData);
+      imageUrl = cloudinaryResponse.secure_url;
+    }
+
+    // If imageUrl is not empty, update user data including the image URL
+    if (imageUrl !== '') {
+      updatedUserData.imageRes = imageUrl;
+    }
+
+    // Update user data
     const updatedUser = await User.findByIdAndUpdate(userId, updatedUserData, { new: true });
 
     if (!updatedUser) {
@@ -248,6 +272,7 @@ export async function updateUserById(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
 
 
 
@@ -272,36 +297,37 @@ export function deleteUserById(req, res) {
 
 
 export function updateScoreById(req, res) {
-
-
-
-  // Check if the request body contains the "score" attribute
+  // Vérifier si le corps de la requête contient l'attribut "score"
   if (!req.body.score) {
     console.log(req.body.score)
     return res.status(400).json({ message: 'Bad Request - Score is required' });
-
   }
 
   if (!req.body.id) {
     console.log(req.body.id)
-
     return res.status(400).json({ message: 'Bad Request - id is required' });
   }
 
-  const updatedUserData = {
-    score: req.body.score,
-  };
-
-  User.findByIdAndUpdate(req.body.id, updatedUserData, { new: true })
-    .then((updatedUser) => {
-      if (!updatedUser) {
-        res.status(404).json({ message: 'Utilisateur introuvable' });
-        console.log("ccccc")
-      } else {
-        res.status(200).json(updatedUser);
+  // Trouver l'utilisateur par ID
+  User.findById(req.body.id)
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
       }
+
+      // Ajouter le nouveau score au score existant
+      const updatedScore = user.score + req.body.score;
+
+      // Mettre à jour le score de l'utilisateur
+      User.findByIdAndUpdate(req.body.id, { score: updatedScore }, { new: true })
+        .then(updatedUser => {
+          res.status(200).json(updatedUser);
+        })
+        .catch(err => {
+          res.status(500).json({ error: err });
+        });
     })
-    .catch((err) => {
+    .catch(err => {
       res.status(500).json({ error: err });
     });
 }

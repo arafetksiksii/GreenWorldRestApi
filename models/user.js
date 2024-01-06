@@ -47,7 +47,7 @@ const userSchema = new Schema(
     },
     isValid: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     imageRes: {
       type: String,
@@ -61,7 +61,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: ['admin', 'user'],
-      default: 'admin',
+      default: 'user',
     },
     points: {
       type: Number,
